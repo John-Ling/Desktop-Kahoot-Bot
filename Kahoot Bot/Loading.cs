@@ -4,6 +4,9 @@ using System.Threading;
 using System.Windows.Forms;
 using OpenQA.Selenium;
 
+// TODO add Control Panel functionality
+
+
 namespace Kahoot_Bot
 {
     public partial class Loading : Form
@@ -13,16 +16,15 @@ namespace Kahoot_Bot
             InitializeComponent();
             loadingBar.Visible = true;
             loadingBar.Minimum = 0;
-            loadingBar.Maximum = (int)botNumber;
+            loadingBar.Maximum = (int)botNumber * 10;
             loadingBar.Step = 1;
 
             indicatorLbl.Visible = true;
             indicatorLbl.Text = "";
-            Thread kahootBotThread = new Thread(() => Kahoot_Bot_Thread(lobbyID, botName, botNumber));
+            Thread kahootBotThread = new Thread(() => Join_Kahoot_Bot(lobbyID, botName, botNumber));
             kahootBotThread.IsBackground = true;
             kahootBotThread.Start();
         }
-
 
         private delegate void Update_Indicator_Label_Delegate(string message);
         private void Update_Indicator_Label(string message)
@@ -34,12 +36,23 @@ namespace Kahoot_Bot
         private delegate void Update_Progress_Bar_Delegate();
         private void Update_Progress_Bar()
         {
-            loadingBar.PerformStep();
+            for (int i = 0; i < 10; i++)
+            {
+                loadingBar.PerformStep();
+            }
         }
 
-
-        private void Kahoot_Bot_Thread(string lobbyID, string botName, uint botNumber)
+        private void Join_Kahoot_Bot(string lobbyID, string botName, uint botNumber)
         {
+            void _Update_Label(string message)
+            {
+                Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), message);
+            }
+
+            void _Update_Bar()
+            {
+                Invoke(new Update_Progress_Bar_Delegate(Update_Progress_Bar));
+            }
 
             // this method is placed on a different thread to prevent stuttering
             // invocations update the UI on the main thread to prevent errors
@@ -50,6 +63,7 @@ namespace Kahoot_Bot
 
             for (int i = 0; i < botNumber; i++)
             {
+                _Update_Label($"Sending bot {i}...");
                 if (i != 0)
                 {
                     ((IJavaScriptExecutor)host.driver).ExecuteScript("window.open();"); // execute javascript command to open new tab
@@ -67,33 +81,33 @@ namespace Kahoot_Bot
 
                 if (joinSuccessful) 
                 {
-                    Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label),"Join successful");
+                    _Update_Label("Join successful");
                 }
                 else
                 {
-                    Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Failed to Join");
+                    _Update_Label("Join failed");
                     updatedBotNumber--;
                 }
-                Invoke(new Update_Progress_Bar_Delegate(Update_Progress_Bar));
+                _Update_Bar();
             }
 
             botNumber = updatedBotNumber;
-            Thread.Sleep(3000);
-            Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Waiting for game to start...");
+            Thread.Sleep(1000);
+            _Update_Label("Waiting for game to start...");
             // wait for game to begin
             host.Wait_For_URL_Change();
             Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Game has Started");
             host.Wait_For_URL_Change();
 
             // answer questions until game ends
-            const string endingURL = "https://kahoot.it/v2/ranking";
-            while (host.driver.Url != endingURL)
+            const string ENDING_URL = "https://kahoot.it/v2/ranking";
+            while (host.driver.Url != ENDING_URL)
             {
                 host.Wait_For_URL_Change();
                 Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Answering Question...");
                 Thread.Sleep(1000);
-                var availableButtons = new List<string>(host.Remove_Options());
-                var i = 0;
+                List<string> availableButtons = new List<string>(host.Remove_Options());
+                int i = 0;
                 foreach (var bot in host.bots)
                 {
                     if (bot.joinSuccessful)

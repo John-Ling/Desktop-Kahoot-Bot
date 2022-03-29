@@ -14,11 +14,12 @@ namespace Kahoot_Bot
 {
     internal class Host
     {
-        public string lobbyID;
-        public string botName;
+        private string lobbyID;
+        private string botName;
         public IWebDriver driver; // webdriver for browser control
         public List<Bot> bots = new List<Bot>(); // List of objects 
         public ChromeOptions options;
+        public ChromeDriverService driverService = ChromeDriverService.CreateDefaultService();
 
         // constructor class
         public Host(string ID, string name)
@@ -27,9 +28,10 @@ namespace Kahoot_Bot
             botName = name;
             options = new ChromeOptions();
             options.AddArgument("headless");
+            driverService.HideCommandPromptWindow = true;
             try // initialise webdriver
             {
-                driver = new ChromeDriver(options);
+                driver = new ChromeDriver(driverService, options);
             }
             catch
             {
@@ -41,12 +43,12 @@ namespace Kahoot_Bot
         public bool Join_Game(int botNumber, bool delay)
         {
             // send a single player bot into a kahoot lobby
+            const string GAME_URL = "https://kahoot.it/";
             string numberedBotName = botName + botNumber; // bot name with individual number
             var joinSuccessful = false;
-
             var bot = new Bot(numberedBotName, joinSuccessful);
 
-            driver.Navigate().GoToUrl("https://kahoot.it/");
+            driver.Navigate().GoToUrl(GAME_URL);
 
             try
             {
@@ -138,7 +140,7 @@ namespace Kahoot_Bot
 
         public void Wait_For_URL_Change()
         {
-            // pause until page changes to a new url
+            // pause until page changes to a new URL
             // example wait until the lobby page changes into the page of the first question 
             var currentURL = driver.Url;
             while (currentURL == driver.Url) { }

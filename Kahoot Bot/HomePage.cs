@@ -1,14 +1,29 @@
 ﻿using System;
+using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace Kahoot_Bot
 {
     public partial class HomePage : Form
     {
+        private Bitmap _logo;
         public HomePage()
         {
             InitializeComponent();
             invalidJoinLbl.Visible = false;
+            if (_logo != null)
+            {
+                _logo.Dispose();
+            }
+            const string PATH_TEMPLATE = @"C:\";
+            const string LOGO_FILENAME = "logo.png";
+            string path = Path.GetFullPath(LOGO_FILENAME);
+
+            logoBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            _logo = new Bitmap(@path);
+            logoBox.ClientSize = new Size(73, 73);
+            logoBox.Image = _logo; 
         }
 
         private void startButton_Click(object sender, EventArgs e)

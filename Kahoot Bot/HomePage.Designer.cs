@@ -39,6 +39,8 @@
             this.indicatorLabel = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.invalidJoinLbl = new System.Windows.Forms.Label();
+            this.logoBox = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.logoBox)).BeginInit();
             this.SuspendLayout();
             // 
             // label2
@@ -137,11 +139,20 @@
             this.invalidJoinLbl.Text = " ";
             this.invalidJoinLbl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // logoBox
+            // 
+            this.logoBox.Location = new System.Drawing.Point(203, 79);
+            this.logoBox.Name = "logoBox";
+            this.logoBox.Size = new System.Drawing.Size(73, 73);
+            this.logoBox.TabIndex = 17;
+            this.logoBox.TabStop = false;
+            // 
             // HomePage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(730, 519);
+            this.Controls.Add(this.logoBox);
             this.Controls.Add(this.invalidJoinLbl);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.indicatorLabel);
@@ -159,6 +170,7 @@
             this.Name = "HomePage";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Kahoot Bot";
+            ((System.ComponentModel.ISupportInitialize)(this.logoBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -175,6 +187,7 @@
         private System.Windows.Forms.Label indicatorLabel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label invalidJoinLbl;
+        private System.Windows.Forms.PictureBox logoBox;
     }
 }
 
