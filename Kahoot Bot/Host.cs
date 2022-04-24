@@ -5,7 +5,6 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
-
 //
 // Backend for kahoot bot
 //
@@ -14,12 +13,12 @@ namespace Kahoot_Bot
 {
     internal class Host
     {
-        private string lobbyID;
-        private string botName;
-        public IWebDriver driver; // webdriver for browser control
-        public List<Bot> bots = new List<Bot>(); // List of objects 
-        public ChromeOptions options;
-        public ChromeDriverService driverService = ChromeDriverService.CreateDefaultService();
+        private static string ?lobbyID;
+        private static string ?botName;
+        public static IWebDriver ?driver; // webdriver for browser control
+        public static List<Bot> bots = new List<Bot>(); // List of all kahoot bots shared across all instances of host
+        public static ChromeOptions ?options;
+        public static ChromeDriverService driverService = ChromeDriverService.CreateDefaultService();
 
         // constructor class
         public Host(string ID, string name)
@@ -35,18 +34,24 @@ namespace Kahoot_Bot
             }
             catch
             {
-                Console.WriteLine("Add chromedriver to path");
+                Console.WriteLine("Webdriver failed to start. Add chromedriver to path");
                 throw new NoSuchElementException();
             }
         }
 
-        public bool Join_Game(int botNumber, bool delay)
+        public bool Join_Game(uint botNumber, bool delay)
         {
             // send a single player bot into a kahoot lobby
             const string GAME_URL = "https://kahoot.it/";
             string numberedBotName = botName + botNumber; // bot name with individual number
-            var joinSuccessful = false;
+            bool joinSuccessful = false;
             var bot = new Bot(numberedBotName, joinSuccessful);
+
+            if (driver is null)
+            {
+                Console.WriteLine("Webdriver is null");
+                return false;
+            }
 
             driver.Navigate().GoToUrl(GAME_URL);
 
@@ -56,14 +61,15 @@ namespace Kahoot_Bot
                 // the block seems to be timer based
                 // refreshing the page to create a brief pause seems to be the quickest way to bypass this
                 // however this does bring network speeds into consideration
-                var workaroundDelay = 500; // 500 milliseconds
+                int workaroundDelay = 500; // 500 milliseconds
                 if (delay == true)
                 {
                     driver.Navigate().Refresh();
                     Thread.Sleep(workaroundDelay);
                 }
                 // while this workaround does prevent most bots from being blocked
-                // the rate of bot joining reduces slightly and on average 2 bots will fail to join since the join cooldown time appears to fluctuate
+                // the rate of bot joining reduces slightly and
+                // on average 2 bots will fail to join since the join cooldown time appears to fluctuate
 
                 WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0, 0, 3));
                 // enter lobby id

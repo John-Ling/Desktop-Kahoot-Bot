@@ -1,7 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Forms;
+// TODO change way logo is loaded after figuring out how software distrubution on VS-2022 works
+// Logo currently is loaded via a hardcoded path
+// change this so it will work on someone else's computer (that person being a customer not developer)
+// Potentially add settings menu to adjust join delay (see host.cs) to account for different network speeds
 
 namespace Kahoot_Bot
 {
@@ -16,13 +26,9 @@ namespace Kahoot_Bot
             {
                 _logo.Dispose();
             }
-            const string PATH_TEMPLATE = @"C:\";
-            const string LOGO_FILENAME = "logo.png";
-            string path = Path.GetFullPath(LOGO_FILENAME);
-
             logoBox.SizeMode = PictureBoxSizeMode.StretchImage;
-            _logo = new Bitmap(@path);
-            logoBox.ClientSize = new Size(73, 73);
+            _logo = new Bitmap(@"C:\Users\John\Source\Repos\Kahoot-Bot\Kahoot Bot\logo.png");
+            logoBox.ClientSize = new Size(50, 50);
             logoBox.Image = _logo; 
         }
 

@@ -3,9 +3,17 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Windows.Forms;
 using OpenQA.Selenium;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-// TODO add Control Panel functionality
-
+/// <summary>
+/// TODO
+/// Finish loading screen ui (Add pictures probably)
+/// </summary>
 
 namespace Kahoot_Bot
 {
@@ -42,7 +50,23 @@ namespace Kahoot_Bot
             }
         }
 
-        private void Join_Kahoot_Bot(string lobbyID, string botName, uint botNumber)
+        private delegate void Update_List_View_Delegate(string botName, bool joinSuccessful);
+        private void Update_List_View(string botName, bool joinSuccessful)
+        {
+            string joinStatus;
+            var item = new ListViewItem(botName);
+            if (joinSuccessful)
+            {
+                joinStatus = "Success";
+            }
+            else
+            {
+                joinStatus = "Failed";
+            }
+            item.SubItems.Add(joinStatus);
+            botsJoinedList.Items.Add(item);
+        }
+        private void Join_Kahoot_Bot(string lobbyID, string botName, uint botCount)
         {
             void _Update_Label(string message)
             {
@@ -54,20 +78,31 @@ namespace Kahoot_Bot
                 Invoke(new Update_Progress_Bar_Delegate(Update_Progress_Bar));
             }
 
+            void _Update_List_View(string botName, bool joinSuccessful)
+            {
+                Invoke(new Update_List_View_Delegate(Update_List_View), botName, joinSuccessful);
+            }
+           
             // this method is placed on a different thread to prevent stuttering
             // invocations update the UI on the main thread to prevent errors
             Host host = new Host(lobbyID, botName);
 
-            var updatedBotNumber = botNumber;
-            var joinSuccessful = false;
+            if (Host.driver is null)
+            { 
+                return;
+            }
 
-            for (int i = 0; i < botNumber; i++)
+            uint finalBotCount = 0;
+            uint updatedBotNumber = botCount;
+            bool joinSuccessful = false;
+            string numberedBotName;
+            for (uint i = 0; i < botCount; i++)
             {
-                _Update_Label($"Sending bot {i}...");
+                //_Update_Label($"Sending bot {i}...");
                 if (i != 0)
                 {
-                    ((IJavaScriptExecutor)host.driver).ExecuteScript("window.open();"); // execute javascript command to open new tab
-                    host.driver.SwitchTo().Window(host.driver.WindowHandles[i]);
+                    ((IJavaScriptExecutor)Host.driver).ExecuteScript("window.open();"); // execute javascript command to open new tab
+                    Host.driver.SwitchTo().Window(Host.driver.WindowHandles[(int)i]);
                 }
                 if (i < 6)
                 {
@@ -81,38 +116,40 @@ namespace Kahoot_Bot
 
                 if (joinSuccessful) 
                 {
-                    _Update_Label("Join successful");
+                    //_Update_Label("Success!");
                 }
                 else
                 {
-                    _Update_Label("Join failed");
+                    //_Update_Label("Fail!");
                     updatedBotNumber--;
                 }
+                numberedBotName = botName + i;
+                _Update_List_View(numberedBotName, joinSuccessful);
                 _Update_Bar();
             }
 
-            botNumber = updatedBotNumber;
+            finalBotCount = updatedBotNumber;
             Thread.Sleep(1000);
-            _Update_Label("Waiting for game to start...");
+            //_Update_Label("Waiting for game to start...");
             // wait for game to begin
             host.Wait_For_URL_Change();
-            Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Game has Started");
+            //Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Game has Started");
             host.Wait_For_URL_Change();
 
             // answer questions until game ends
             const string ENDING_URL = "https://kahoot.it/v2/ranking";
-            while (host.driver.Url != ENDING_URL)
+            while (Host.driver.Url != ENDING_URL)
             {
                 host.Wait_For_URL_Change();
                 Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Answering Question...");
                 Thread.Sleep(1000);
                 List<string> availableButtons = new List<string>(host.Remove_Options());
                 int i = 0;
-                foreach (var bot in host.bots)
+                foreach (var bot in Host.bots)
                 {
                     if (bot.joinSuccessful)
                     {
-                        host.driver.SwitchTo().Window(host.driver.WindowHandles[i]);
+                        Host.driver.SwitchTo().Window(Host.driver.WindowHandles[i]);
                         host.Answer_Question(availableButtons);
                     }
                     i++;
@@ -124,7 +161,7 @@ namespace Kahoot_Bot
 
             Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Game has Finished");
             Thread.Sleep(5000);
-            host.driver.Quit();
+            Host.driver.Quit();
             GC.Collect();
         }
     }
