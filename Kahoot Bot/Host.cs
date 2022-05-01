@@ -11,6 +11,19 @@ using SeleniumExtras.WaitHelpers;
 
 namespace Kahoot_Bot
 {
+    struct Bot // single player bot
+    {
+        public string name;
+        public bool joinSuccessful;
+        public int score;
+
+        public Bot(string name, int score, bool joinSuccessful)
+        {
+            this.name = name; 
+            this.score = score; 
+            this.joinSuccessful = joinSuccessful;    
+        }
+    }
     internal class Host
     {
         private static string ?lobbyID;
@@ -19,7 +32,7 @@ namespace Kahoot_Bot
         public static List<Bot> bots = new List<Bot>(); // List of all kahoot bots shared across all instances of host
         public static ChromeOptions ?options;
         public static ChromeDriverService driverService = ChromeDriverService.CreateDefaultService();
-
+        public static bool kill = false;
         // constructor class
         public Host(string ID, string name)
         {
@@ -38,14 +51,14 @@ namespace Kahoot_Bot
                 throw new NoSuchElementException();
             }
         }
-
-        public bool Join_Game(uint botNumber, bool delay)
+        public bool Join_Game(int botNumber, bool delay)
         {
             // send a single player bot into a kahoot lobby
             const string GAME_URL = "https://kahoot.it/";
             string numberedBotName = botName + botNumber; // bot name with individual number
             bool joinSuccessful = false;
-            var bot = new Bot(numberedBotName, joinSuccessful);
+            int defaultScore = 0;
+            var bot = new Bot(numberedBotName, defaultScore, joinSuccessful);
 
             if (driver is null)
             {
@@ -71,7 +84,7 @@ namespace Kahoot_Bot
                 // the rate of bot joining reduces slightly and
                 // on average 2 bots will fail to join since the join cooldown time appears to fluctuate
 
-                WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0, 0, 3));
+                var wait = new WebDriverWait(driver, new TimeSpan(0, 0, 3));
                 // enter lobby id
                 IWebElement gamePinTextBox = wait.Until(e => e.FindElement(By.Id("game-input")));
                 gamePinTextBox.SendKeys(lobbyID + Keys.Enter);
@@ -107,6 +120,12 @@ namespace Kahoot_Bot
                 "circle-button",
                 "square-button"
             };
+
+            if (driver is null)
+            {
+                throw new ArgumentNullException();
+            }
+
             // you cannot remove items from a array whilst enumerating through it so two arrays are needed
             foreach (var buttonID in buttonsPresent)
             {
@@ -130,11 +149,11 @@ namespace Kahoot_Bot
             var random = new Random();
             var numberOfButtons = availableAnswers.Count;
             int buttonIndex = random.Next(0, numberOfButtons);
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(1.5));
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(1.5));
 
             try
             {
-                // wait until buton is available
+                // wait until button is available
                 IWebElement button = wait.Until(e => e.FindElement(By.Id(availableAnswers[buttonIndex])));
                 button.Click();
             }
@@ -143,13 +162,26 @@ namespace Kahoot_Bot
                 Console.WriteLine("Failed to answer");
             }
         }
-
         public void Wait_For_URL_Change()
         {
             // pause until page changes to a new URL
             // example wait until the lobby page changes into the page of the first question 
+            if (driver is null)
+            {
+                throw new ArgumentNullException();
+            }
             var currentURL = driver.Url;
-            while (currentURL == driver.Url) { }
+            while (currentURL == driver.Url) {}
+        }
+
+        public void Shutdown_Host()
+        {
+            // end host and shutdown chromedriver
+            if (driver is null)
+            {
+                throw new ArgumentNullException();
+            }
+            driver.Quit();
         }
     }
 }

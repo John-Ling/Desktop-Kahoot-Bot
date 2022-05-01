@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Forms;
@@ -36,7 +37,7 @@ namespace Kahoot_Bot
         {
             string lobbyID;
             string botName;
-            uint botNumber = 0;
+            int botNumber = 0;
             bool textBoxesContainData = false;
 
             lobbyID = lobbyIDTextbox.Text;
@@ -57,7 +58,7 @@ namespace Kahoot_Bot
             if (!String.IsNullOrEmpty(botNumberTextbox.Text))
             {
                 textBoxesContainData = true;
-                botNumber = uint.Parse(botNumberTextbox.Text);
+                botNumber = int.Parse(botNumberTextbox.Text);
             }
             else { textBoxesContainData = false; }
 
@@ -72,6 +73,7 @@ namespace Kahoot_Bot
             {
                 invalidJoinLbl.Text = "Please ensure all fields are filled";
                 invalidJoinLbl.Visible = true;
+                lobbyIDTextbox.Focus();
             }
         }
         private void Clear_Text_Boxes()

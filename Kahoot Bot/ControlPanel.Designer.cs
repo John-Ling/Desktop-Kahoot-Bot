@@ -35,33 +35,42 @@
             this.label2 = new System.Windows.Forms.Label();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.botPlacement = new System.Windows.Forms.ColumnHeader();
+            this.botName = new System.Windows.Forms.ColumnHeader();
+            this.botScore = new System.Windows.Forms.ColumnHeader();
             this.SuspendLayout();
             // 
             // listView1
             // 
             this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.botPlacement,
+            this.botName,
+            this.botScore});
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(709, 42);
+            this.listView1.Location = new System.Drawing.Point(686, 31);
             this.listView1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(168, 382);
+            this.listView1.Size = new System.Drawing.Size(194, 382);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.View = System.Windows.Forms.View.Details;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(756, 25);
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(744, 12);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(73, 15);
+            this.label1.Size = new System.Drawing.Size(84, 17);
             this.label1.TabIndex = 1;
             this.label1.Text = "Leaderboard";
             // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button1.Location = new System.Drawing.Point(10, 417);
+            this.button1.Location = new System.Drawing.Point(778, 421);
             this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(104, 25);
@@ -101,6 +110,21 @@
             this.radioButton2.Text = "radioButton2";
             this.radioButton2.UseVisualStyleBackColor = true;
             // 
+            // botPlacement
+            // 
+            this.botPlacement.Text = "Placement";
+            this.botPlacement.Width = 70;
+            // 
+            // botName
+            // 
+            this.botName.Text = "Name";
+            this.botName.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // botScore
+            // 
+            this.botScore.Text = "Score";
+            this.botScore.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
             // ControlPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -129,5 +153,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.RadioButton radioButton2;
+        private System.Windows.Forms.ColumnHeader botPlacement;
+        private System.Windows.Forms.ColumnHeader botName;
+        private System.Windows.Forms.ColumnHeader botScore;
     }
 }

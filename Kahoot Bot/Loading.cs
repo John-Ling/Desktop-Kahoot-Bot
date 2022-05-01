@@ -12,21 +12,30 @@ using System.Threading.Tasks;
 
 /// <summary>
 /// TODO
-/// Finish loading screen ui (Add pictures probably)
+/// Nothing urgent at the moment
 /// </summary>
 
 namespace Kahoot_Bot
 {
     public partial class Loading : Form
     {
-        public Loading(string lobbyID, string botName, uint botNumber)
+        private Bitmap _fullLogo;
+        private bool killBot = false;
+        public Loading(string lobbyID, string botName, int botNumber)
         {
             InitializeComponent();
             loadingBar.Visible = true;
             loadingBar.Minimum = 0;
-            loadingBar.Maximum = (int)botNumber * 10;
+            loadingBar.Maximum = botNumber * 10;
             loadingBar.Step = 1;
 
+            if (_fullLogo is not null)
+            {
+                _fullLogo.Dispose();
+            }
+            logoFull.SizeMode = PictureBoxSizeMode.StretchImage;
+            _fullLogo = new Bitmap(@"C:\Users\John\Source\Repos\Kahoot-Bot\Kahoot Bot\logo_full.png");
+            logoFull.Image = _fullLogo; 
             indicatorLbl.Visible = true;
             indicatorLbl.Text = "";
             Thread kahootBotThread = new Thread(() => Join_Kahoot_Bot(lobbyID, botName, botNumber));
@@ -50,37 +59,19 @@ namespace Kahoot_Bot
             }
         }
 
-        private delegate void Update_List_View_Delegate(string botName, bool joinSuccessful);
-        private void Update_List_View(string botName, bool joinSuccessful)
+        private delegate void Update_List_View_Delegate(string botName, string message);
+        private void Update_List_View(string botName, string message)
         {
-            string joinStatus;
             var item = new ListViewItem(botName);
-            if (joinSuccessful)
-            {
-                joinStatus = "Success";
-            }
-            else
-            {
-                joinStatus = "Failed";
-            }
-            item.SubItems.Add(joinStatus);
+            item.SubItems.Add(message);
             botsJoinedList.Items.Add(item);
         }
-        private void Join_Kahoot_Bot(string lobbyID, string botName, uint botCount)
+
+        private void Join_Kahoot_Bot(string lobbyID, string botName, int botCount)
         {
             void _Update_Label(string message)
             {
                 Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), message);
-            }
-
-            void _Update_Bar()
-            {
-                Invoke(new Update_Progress_Bar_Delegate(Update_Progress_Bar));
-            }
-
-            void _Update_List_View(string botName, bool joinSuccessful)
-            {
-                Invoke(new Update_List_View_Delegate(Update_List_View), botName, joinSuccessful);
             }
            
             // this method is placed on a different thread to prevent stuttering
@@ -92,17 +83,23 @@ namespace Kahoot_Bot
                 return;
             }
 
-            uint finalBotCount = 0;
-            uint updatedBotNumber = botCount;
+            int finalBotCount = 0;
+            int botsJoinedSoFar = 0;
             bool joinSuccessful = false;
             string numberedBotName;
-            for (uint i = 0; i < botCount; i++)
+            string joinSuccessfulString;
+            _Update_Label("Loading...");
+            for (int i = 0; i < botCount; i++)           
             {
-                //_Update_Label($"Sending bot {i}...");
+                joinSuccessfulString = "Success";
+                if (killBot)
+                {
+                    break;
+                }
                 if (i != 0)
                 {
                     ((IJavaScriptExecutor)Host.driver).ExecuteScript("window.open();"); // execute javascript command to open new tab
-                    Host.driver.SwitchTo().Window(Host.driver.WindowHandles[(int)i]);
+                    Host.driver.SwitchTo().Window(Host.driver.WindowHandles[i]);
                 }
                 if (i < 6)
                 {
@@ -110,33 +107,37 @@ namespace Kahoot_Bot
                 }
                 else
                 {
-                    // apply delay
                     joinSuccessful = host.Join_Game(botNumber: i, delay: true);
                 }
 
-                if (joinSuccessful) 
+                if (!joinSuccessful)
                 {
-                    //_Update_Label("Success!");
-                }
-                else
-                {
-                    //_Update_Label("Fail!");
-                    updatedBotNumber--;
+                    joinSuccessfulString = "Failed";
+                    botCount--;
                 }
                 numberedBotName = botName + i;
-                _Update_List_View(numberedBotName, joinSuccessful);
-                _Update_Bar();
+                Invoke(new Update_List_View_Delegate(Update_List_View), numberedBotName, joinSuccessfulString);
+                Invoke(new Update_Progress_Bar_Delegate(Update_Progress_Bar));
+                botsJoinedSoFar++;
             }
+            if (killBot)
+            {
+                host.Shutdown_Host();
+                Invoke(new Action(() => Application.Exit()));
+            }
+            else
+            {
+                Thread.Sleep(1000);
+                finalBotCount = botCount;
+                _Update_Label("Waiting for game to start...");
+                // wait for game to begin
+                host.Wait_For_URL_Change();
+                Hide();
+                //Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Game has Started");
+            }
+            
 
-            finalBotCount = updatedBotNumber;
-            Thread.Sleep(1000);
-            //_Update_Label("Waiting for game to start...");
-            // wait for game to begin
-            host.Wait_For_URL_Change();
-            //Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Game has Started");
-            host.Wait_For_URL_Change();
-
-            // answer questions until game ends
+            /*
             const string ENDING_URL = "https://kahoot.it/v2/ranking";
             while (Host.driver.Url != ENDING_URL)
             {
@@ -163,6 +164,12 @@ namespace Kahoot_Bot
             Thread.Sleep(5000);
             Host.driver.Quit();
             GC.Collect();
+            */
+        }
+
+        private void killButton_Click(object sender, EventArgs e)
+        {
+            killBot = true;
         }
     }
 }
