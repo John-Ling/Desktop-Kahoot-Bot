@@ -101,12 +101,12 @@
             // 
             // killButton
             // 
-            this.killButton.Location = new System.Drawing.Point(621, 397);
+            this.killButton.Location = new System.Drawing.Point(608, 397);
             this.killButton.Name = "killButton";
             this.killButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.killButton.Size = new System.Drawing.Size(75, 23);
+            this.killButton.Size = new System.Drawing.Size(88, 23);
             this.killButton.TabIndex = 6;
-            this.killButton.Text = "Kill Bots";
+            this.killButton.Text = "Kick All Bots";
             this.killButton.UseVisualStyleBackColor = true;
             this.killButton.Click += new System.EventHandler(this.killButton_Click);
             // 
@@ -127,6 +127,7 @@
             this.Name = "Loading";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Loading...";
+            this.Shown += new System.EventHandler(this.Shown_Event);
             ((System.ComponentModel.ISupportInitialize)(this.logoFull)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

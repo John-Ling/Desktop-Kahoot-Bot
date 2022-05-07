@@ -13,6 +13,8 @@ namespace Kahoot_Bot
 {
     struct Bot // single player bot
     {
+        public static int answersCorrect = 0;
+        public static int answersWrong = 0;
         public string name;
         public bool joinSuccessful;
         public int score;
@@ -26,31 +28,35 @@ namespace Kahoot_Bot
     }
     internal class Host
     {
-        private static string ?lobbyID;
-        private static string ?botName;
+        public static string ?lobbyID;
+        public static string ?botName;
         public static IWebDriver ?driver; // webdriver for browser control
         public static List<Bot> bots = new List<Bot>(); // List of all kahoot bots shared across all instances of host
         public static ChromeOptions ?options;
         public static ChromeDriverService driverService = ChromeDriverService.CreateDefaultService();
         public static bool kill = false;
-        // constructor class
+
         public Host(string ID, string name)
         {
             lobbyID = ID;
             botName = name;
+        }
+
+        public void Initialise_Webdriver()
+        {
             options = new ChromeOptions();
             options.AddArgument("headless");
             driverService.HideCommandPromptWindow = true;
-            try // initialise webdriver
+            try
             {
                 driver = new ChromeDriver(driverService, options);
             }
-            catch
+            catch (NoSuchElementException)
             {
-                Console.WriteLine("Webdriver failed to start. Add chromedriver to path");
-                throw new NoSuchElementException();
+                throw new NoSuchElementException("Web driver failed. Try adding chromedriver to path");
             }
         }
+
         public bool Join_Game(int botNumber, bool delay)
         {
             // send a single player bot into a kahoot lobby
@@ -162,6 +168,7 @@ namespace Kahoot_Bot
                 Console.WriteLine("Failed to answer");
             }
         }
+
         public void Wait_For_URL_Change()
         {
             // pause until page changes to a new URL
