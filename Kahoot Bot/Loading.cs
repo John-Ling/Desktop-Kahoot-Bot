@@ -11,16 +11,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 /// <summary>
-/// TODO
-/// Connect Loading.cs to ControlPanel.cs when game begins
+/// TODO Connect Loading.cs to ControlPanel.cs when game begins
 /// </summary>
 
 namespace Kahoot_Bot
 {
     public partial class Loading : Form
     {
-        private Bitmap _fullLogo;
-        private bool killBot = false;
+        private Bitmap fullLogo;
+        private bool kickBot = false;
         private int botCount;
         private Host host;
 
@@ -35,13 +34,13 @@ namespace Kahoot_Bot
             loadingBar.Maximum = botCount * 10;
             loadingBar.Step = 1;
 
-            if (_fullLogo is not null)
+            if (fullLogo is not null)
             {
-                _fullLogo.Dispose();
+                fullLogo.Dispose();
             }
             logoFull.SizeMode = PictureBoxSizeMode.StretchImage;
-            _fullLogo = new Bitmap(@"C:\Users\John\Source\Repos\Kahoot-Bot\Kahoot Bot\logo_full.png");
-            logoFull.Image = _fullLogo; 
+            fullLogo = new Bitmap(@"C:\Users\John\Source\Repos\Kahoot-Bot\Kahoot Bot\logo_full.png");
+            logoFull.Image = fullLogo; 
             indicatorLbl.Visible = true;
             indicatorLbl.Text = "";
         }
@@ -56,23 +55,9 @@ namespace Kahoot_Bot
         {
             // wait until the game begins
             await Join_Game(host, botCount);
-        }
-
-        private delegate void Update_Progress_Bar_Delegate();
-        private void Update_Progress_Bar()
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                loadingBar.PerformStep();
-            }
-        }
-
-        private delegate void Update_List_View_Delegate(string botName, string message);
-        private void Update_List_View(string botName, string message)
-        {
-            var item = new ListViewItem(botName);
-            item.SubItems.Add(message);
-            botsJoinedList.Items.Add(item);
+            var controlPanel = new ControlPanel(host);
+            Hide();
+            controlPanel.Show();
         }
 
         private async Task Join_Game(Host host, int botCount)
@@ -85,8 +70,8 @@ namespace Kahoot_Bot
             int botsJoinedSoFar = 0;
             bool joinSuccessful = false;
             string numberedBotName;
-            string joinSuccessfulString;
-            await Task.Run(() =>
+            string statusString;
+            await Task.Run(async () =>
             {
                 host.Initialise_Webdriver();
 
@@ -98,8 +83,8 @@ namespace Kahoot_Bot
                 _Update_Label("Loading...");
                 for (int i = 0; i < botCount; i++)
                 {
-                    joinSuccessfulString = "Success";
-                    if (killBot)
+                    statusString = "Success";
+                    if (kickBot)
                     {
                         break;
                     }
@@ -119,22 +104,33 @@ namespace Kahoot_Bot
 
                     if (!joinSuccessful)
                     {
-                        joinSuccessfulString = "Failed";
+                        statusString = "Failed";
                         botCount--;
                     }
                     numberedBotName = Host.botName + i;
-                    Invoke(new Update_List_View_Delegate(Update_List_View), numberedBotName, joinSuccessfulString);
-                    Invoke(new Update_Progress_Bar_Delegate(Update_Progress_Bar));
+                    Invoke(new Action(() =>
+                    {
+                        var item = new ListViewItem(numberedBotName);
+                        item.SubItems.Add(statusString);
+                        botsJoinedList.Items.Add(item);
+                    }));
+                    Invoke(new Action(() =>
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            loadingBar.PerformStep();
+                        }
+                    }));
                     botsJoinedSoFar++;
                 }
-                if (killBot)
+                if (kickBot)
                 {
                     host.Shutdown_Host();
                     Invoke(new Action(() => Application.Exit()));
                 }
                 else
                 {
-                    Thread.Sleep(1000);
+                    await Task.Delay(1000);
                     finalBotCount = botCount;
                     _Update_Label("Waiting for game to start...");
                     // wait for game to begin
@@ -144,9 +140,9 @@ namespace Kahoot_Bot
             });
         }
 
-        private void killButton_Click(object sender, EventArgs e)
+        private void kickButton_Click(object sender, EventArgs e)
         {
-            killBot = true;
+            kickBot = true;
         }
 
         
