@@ -11,7 +11,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 /// <summary>
-/// TODO Connect Loading.cs to ControlPanel.cs when game begins
 /// </summary>
 
 namespace Kahoot_Bot
@@ -62,10 +61,11 @@ namespace Kahoot_Bot
 
         private async Task Join_Game(Host host, int botCount)
         {
-            void _Update_Label(string message)
+            void Update_Label(string message)
             {
                 Invoke(new Action(() => indicatorLbl.Text = message));
             }
+
             int finalBotCount = 0;
             int botsJoinedSoFar = 0;
             bool joinSuccessful = false;
@@ -80,7 +80,7 @@ namespace Kahoot_Bot
                     throw new ArgumentNullException("Driver is null");
                 }
 
-                _Update_Label("Loading...");
+                Update_Label("Loading...");
                 for (int i = 0; i < botCount; i++)
                 {
                     statusString = "Success";
@@ -107,7 +107,7 @@ namespace Kahoot_Bot
                         statusString = "Failed";
                         botCount--;
                     }
-                    numberedBotName = Host.botName + i;
+                    numberedBotName = host.botName + i;
                     Invoke(new Action(() =>
                     {
                         var item = new ListViewItem(numberedBotName);
@@ -132,7 +132,7 @@ namespace Kahoot_Bot
                 {
                     await Task.Delay(1000);
                     finalBotCount = botCount;
-                    _Update_Label("Waiting for game to start...");
+                    Update_Label("Waiting for game to start...");
                     // wait for game to begin
                     host.Wait_For_URL_Change();
                     //Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Game has Started");
@@ -144,7 +144,5 @@ namespace Kahoot_Bot
         {
             kickBot = true;
         }
-
-        
     }
 }

@@ -18,19 +18,19 @@ namespace Kahoot_Bot
 {
     public partial class HomePage : Form
     {
-        private Bitmap _logo;
+        private Bitmap logo;
         public HomePage()
         {
             InitializeComponent();
             invalidJoinLbl.Visible = false;
-            if (_logo != null)
+            if (logo is not null)
             {
-                _logo.Dispose();
+                logo.Dispose();
             }
             logoBox.SizeMode = PictureBoxSizeMode.StretchImage;
-            _logo = new Bitmap(@"C:\Users\John\Source\Repos\Kahoot-Bot\Kahoot Bot\logo.png");
+            logo = new Bitmap(@"C:\Users\John\Source\Repos\Kahoot-Bot\Kahoot Bot\logo.png");
             logoBox.ClientSize = new Size(50, 50);
-            logoBox.Image = _logo; 
+            logoBox.Image = logo; 
         }
 
         private void startButton_Click(object sender, EventArgs e)

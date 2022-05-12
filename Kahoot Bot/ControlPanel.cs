@@ -32,6 +32,7 @@ namespace Kahoot_Bot
     {
         private Bitmap fullLogo;
         private Host host;
+
         public ControlPanel(Host host)
         {
             InitializeComponent();
@@ -51,9 +52,42 @@ namespace Kahoot_Bot
             
         }
 
-        private void Intialise_List_Views()
+        private void Initialise_List_Views()
         {
             throw new NotImplementedException();
+        }
+        
+
+        private async Task Play_Game(Host host)
+        {
+            await Task.Run(async () =>
+            {
+                const string ENDING_URL = "https://kahoot.it/v2/ranking";
+                // repeat until game has ended
+                while (Host.driver.Url != ENDING_URL)
+                {
+                    host.Wait_For_URL_Change();
+                    //Thread.Sleep(1000);
+                    await Task.Delay(1000);
+                    List<string> availableButtons = new List<string>(host.Remove_Options());
+                    int i = 0;
+                    foreach (var bot in host.Bots)
+                    {
+                        if (bot.joinSuccessful)
+                        {
+                            Host.driver.SwitchTo().Window(Host.driver.WindowHandles[i]);
+                            host.Answer_Question(availableButtons);
+                        }
+                        i++;
+                    }
+                    host.Wait_For_URL_Change();
+                    host.Wait_For_URL_Change();
+                }
+
+                await Task.Delay(5000);
+                Host.driver.Quit();
+                GC.Collect();
+            });
         }
     }
 }

@@ -11,10 +11,10 @@ using SeleniumExtras.WaitHelpers;
 
 namespace Kahoot_Bot
 {
-    struct Bot // single player bot
+    public struct Bot // single player bot
     {
-        public static int answersCorrect = 0;
-        public static int answersWrong = 0;
+        public int answersCorrect;
+        public int answersWrong;
         public string name;
         public bool joinSuccessful;
         public int score;
@@ -23,18 +23,27 @@ namespace Kahoot_Bot
         {
             this.name = name; 
             this.score = score; 
-            this.joinSuccessful = joinSuccessful;    
+            this.joinSuccessful = joinSuccessful;
+            answersCorrect = 0;
+            answersWrong = 0;
         }
     }
-    internal class Host
+
+    public class Host
     {
-        public static string ?lobbyID;
-        public static string ?botName;
+        public string ?lobbyID;
+        public string ?botName;
         public static IWebDriver ?driver; // webdriver for browser control
-        public static List<Bot> bots = new List<Bot>(); // List of all kahoot bots shared across all instances of host
-        public static ChromeOptions ?options;
-        public static ChromeDriverService driverService = ChromeDriverService.CreateDefaultService();
-        public static bool kill = false;
+
+        private static List<Bot> bots = new List<Bot>(); // List of all kahoot bots shared across all instances of host
+        private static ChromeOptions ?options;
+        private static ChromeDriverService driverService = ChromeDriverService.CreateDefaultService();
+
+        public List<Bot> Bots
+        {
+            get { return bots; }
+            set { bots = value; }
+        }
 
         public Host(string ID, string name)
         {
@@ -92,11 +101,11 @@ namespace Kahoot_Bot
 
                 var wait = new WebDriverWait(driver, new TimeSpan(0, 0, 3));
                 // enter lobby id
-                IWebElement gamePinTextBox = wait.Until(e => e.FindElement(By.Id("game-input")));
+                var gamePinTextBox = wait.Until(e => e.FindElement(By.Id("game-input")));
                 gamePinTextBox.SendKeys(lobbyID + Keys.Enter);
 
                 // enter name
-                IWebElement nicknameTextBox = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("nickname")));
+                var nicknameTextBox = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("nickname")));
                 nicknameTextBox.SendKeys(numberedBotName + Keys.Enter);
 
                 joinSuccessful = true;
@@ -153,14 +162,14 @@ namespace Kahoot_Bot
         {
             // get a bot to randomly answer a kahoot question
             var random = new Random();
-            var numberOfButtons = availableAnswers.Count;
+            int numberOfButtons = availableAnswers.Count;
             int buttonIndex = random.Next(0, numberOfButtons);
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(1.5));
 
             try
             {
                 // wait until button is available
-                IWebElement button = wait.Until(e => e.FindElement(By.Id(availableAnswers[buttonIndex])));
+                var button = wait.Until(e => e.FindElement(By.Id(availableAnswers[buttonIndex])));
                 button.Click();
             }
             catch (TimeoutException)
@@ -177,7 +186,7 @@ namespace Kahoot_Bot
             {
                 throw new ArgumentNullException();
             }
-            var currentURL = driver.Url;
+            string currentURL = driver.Url;
             while (currentURL == driver.Url) {}
         }
 
