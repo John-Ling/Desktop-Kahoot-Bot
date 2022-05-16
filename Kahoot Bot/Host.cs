@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Diagnostics;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 //
 // Backend for kahoot bot
+// TODO Fix bug where all buttons are deleted even when they are all present 
+// Potential fixes: Search for buttons via Xpath
 //
 
 namespace Kahoot_Bot
@@ -122,35 +125,38 @@ namespace Kahoot_Bot
 
         public List<string> Remove_Options()
         {
-            var buttonsPresent = new List<string> { // these are html ids for the 4 kahoot buttons
-                "triangle-button",
-                "diamond-button",
-                "circle-button",
-                "square-button"
+            // remove options that are not present when answering (for example a True/False questions wouldn't have the green or yellow button)
+            var buttonsPresent = new List<string> { // html xpaths for the 4 kahoot buttons
+                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[1]",
+                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[2]",
+                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[3]",
+                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[4]"
             };
 
-            var tmp = new List<string> { // these are html ids for the 4 kahoot buttons
-                "triangle-button",
-                "diamond-button",
-                "circle-button",
-                "square-button"
+            var tmp = new List<string> {
+                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[1]",
+                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[2]",
+                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[3]",
+                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[4]"
             };
 
             if (driver is null)
             {
-                throw new ArgumentNullException();
+                throw new NullReferenceException();
             }
-
             // you cannot remove items from a array whilst enumerating through it so two arrays are needed
-            foreach (var buttonID in buttonsPresent)
+
+            foreach (var xpath in buttonsPresent)
             {
                 try
                 {
-                    driver.FindElement(By.Id(buttonID));
+                    driver.FindElement(By.XPath(xpath));
+                    Debug.WriteLine("Success");
                 }
                 catch (NoSuchElementException)
                 {
-                    tmp.Remove(buttonID);
+                    tmp.Remove(xpath);
+                    Debug.WriteLine("Removing option");
                 }
             }
 
@@ -163,13 +169,13 @@ namespace Kahoot_Bot
             // get a bot to randomly answer a kahoot question
             var random = new Random();
             int numberOfButtons = availableAnswers.Count;
-            int buttonIndex = random.Next(0, numberOfButtons);
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(1.5));
+            int index = random.Next(0, numberOfButtons);
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
 
             try
             {
                 // wait until button is available
-                var button = wait.Until(e => e.FindElement(By.Id(availableAnswers[buttonIndex])));
+                var button = wait.Until(e => e.FindElement(By.XPath(availableAnswers[index])));
                 button.Click();
             }
             catch (TimeoutException)
@@ -184,7 +190,7 @@ namespace Kahoot_Bot
             // example wait until the lobby page changes into the page of the first question 
             if (driver is null)
             {
-                throw new ArgumentNullException();
+                throw new NullReferenceException();
             }
             string currentURL = driver.Url;
             while (currentURL == driver.Url) {}
@@ -195,7 +201,7 @@ namespace Kahoot_Bot
             // end host and shutdown chromedriver
             if (driver is null)
             {
-                throw new ArgumentNullException();
+                throw new NullReferenceException();
             }
             driver.Quit();
         }

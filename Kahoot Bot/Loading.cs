@@ -47,7 +47,7 @@ namespace Kahoot_Bot
         private void Shown_Event(object sender, EventArgs e)
         {
             // start separate task to join host into game
-            Task joinGameTask = Shown_Event_Async(sender, e);
+            var joinGameTask = Shown_Event_Async(sender, e);
         }
 
         private async Task Shown_Event_Async(object sender, EventArgs e)
@@ -77,7 +77,7 @@ namespace Kahoot_Bot
 
                 if (Host.driver is null)
                 {
-                    throw new ArgumentNullException("Driver is null");
+                    throw new NullReferenceException("Driver is null");
                 }
 
                 Update_Label("Loading...");

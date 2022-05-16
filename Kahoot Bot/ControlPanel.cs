@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 // TODO actually implement functinality
 // Add getters and setters across entire program for private variables
@@ -49,7 +50,16 @@ namespace Kahoot_Bot
             progressBar.Minimum = 0;
             progressBar.Maximum = questions * 10;
             progressBar.Step = 1;
-            
+        }
+
+        private void ControlPanel_Shown(object sender, EventArgs e)
+        {
+            var playGameTask = ControlPanel_Shown_Async(sender, e);
+        }
+
+        private async Task ControlPanel_Shown_Async(object sender, EventArgs e)
+        {
+            await Play_Game(host);
         }
 
         private void Initialise_List_Views()
@@ -57,20 +67,31 @@ namespace Kahoot_Bot
             throw new NotImplementedException();
         }
         
-
         private async Task Play_Game(Host host)
         {
             await Task.Run(async () =>
             {
-                const string ENDING_URL = "https://kahoot.it/v2/ranking";
+                const string ENDING_URL = "https://kahoot.it/ranking";
+                if (Host.driver is null)
+                {
+                    throw new NullReferenceException("Driver is null");
+                }
+                Debug.WriteLine(Host.driver.Url);
+                Debug.WriteLine("Starting game");
+                host.Wait_For_URL_Change();
+
                 // repeat until game has ended
                 while (Host.driver.Url != ENDING_URL)
                 {
+                    Debug.WriteLine($"Waiting for url change current url {Host.driver.Url}");
                     host.Wait_For_URL_Change();
-                    //Thread.Sleep(1000);
+                    Debug.WriteLine(Host.driver.Url);
                     await Task.Delay(1000);
+                    Debug.WriteLine($"Removing unavailable buttons");
                     List<string> availableButtons = new List<string>(host.Remove_Options());
+
                     int i = 0;
+                    Debug.WriteLine("Answering question");
                     foreach (var bot in host.Bots)
                     {
                         if (bot.joinSuccessful)
@@ -80,8 +101,12 @@ namespace Kahoot_Bot
                         }
                         i++;
                     }
-                    host.Wait_For_URL_Change();
-                    host.Wait_For_URL_Change();
+
+                    // this is not a typo
+                    Debug.WriteLine("Waiting for URL change 1");
+                    host.Wait_For_URL_Change();  // wait until page changes from correct/wrong answer screen
+                    Debug.WriteLine("Waiting for URL change 2");
+                    host.Wait_For_URL_Change(); // wait until page changes from question loading screen
                 }
 
                 await Task.Delay(5000);

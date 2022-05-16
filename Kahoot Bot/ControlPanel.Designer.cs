@@ -121,7 +121,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(21, 277);
+            this.button2.Location = new System.Drawing.Point(21, 267);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(103, 26);
             this.button2.TabIndex = 42;
@@ -132,7 +132,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label7.Location = new System.Drawing.Point(20, 254);
+            this.label7.Location = new System.Drawing.Point(20, 244);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(106, 20);
             this.label7.TabIndex = 41;
@@ -166,7 +166,7 @@
             // forceNone
             // 
             this.forceNone.AutoSize = true;
-            this.forceNone.Location = new System.Drawing.Point(187, 376);
+            this.forceNone.Location = new System.Drawing.Point(187, 366);
             this.forceNone.Name = "forceNone";
             this.forceNone.Size = new System.Drawing.Size(103, 19);
             this.forceNone.TabIndex = 35;
@@ -210,7 +210,7 @@
             // forceSquare
             // 
             this.forceSquare.AutoSize = true;
-            this.forceSquare.Location = new System.Drawing.Point(187, 351);
+            this.forceSquare.Location = new System.Drawing.Point(187, 341);
             this.forceSquare.Name = "forceSquare";
             this.forceSquare.Size = new System.Drawing.Size(61, 19);
             this.forceSquare.TabIndex = 25;
@@ -221,7 +221,7 @@
             // forceCircle
             // 
             this.forceCircle.AutoSize = true;
-            this.forceCircle.Location = new System.Drawing.Point(187, 326);
+            this.forceCircle.Location = new System.Drawing.Point(187, 316);
             this.forceCircle.Name = "forceCircle";
             this.forceCircle.Size = new System.Drawing.Size(55, 19);
             this.forceCircle.TabIndex = 24;
@@ -232,7 +232,7 @@
             // forceDiamond
             // 
             this.forceDiamond.AutoSize = true;
-            this.forceDiamond.Location = new System.Drawing.Point(187, 302);
+            this.forceDiamond.Location = new System.Drawing.Point(187, 292);
             this.forceDiamond.Name = "forceDiamond";
             this.forceDiamond.Size = new System.Drawing.Size(74, 19);
             this.forceDiamond.TabIndex = 23;
@@ -243,7 +243,7 @@
             // forceTriangle
             // 
             this.forceTriangle.AutoSize = true;
-            this.forceTriangle.Location = new System.Drawing.Point(187, 277);
+            this.forceTriangle.Location = new System.Drawing.Point(187, 267);
             this.forceTriangle.Name = "forceTriangle";
             this.forceTriangle.Size = new System.Drawing.Size(66, 19);
             this.forceTriangle.TabIndex = 22;
@@ -255,7 +255,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(170, 254);
+            this.label2.Location = new System.Drawing.Point(170, 244);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(156, 20);
             this.label2.TabIndex = 21;
@@ -264,7 +264,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button1.Location = new System.Drawing.Point(21, 308);
+            this.button1.Location = new System.Drawing.Point(21, 298);
             this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(104, 26);
@@ -330,6 +330,7 @@
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "ControlPanel";
             this.Text = "Control Panel";
+            this.Shown += new System.EventHandler(this.ControlPanel_Shown);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
