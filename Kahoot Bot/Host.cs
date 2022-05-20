@@ -14,24 +14,6 @@ using SeleniumExtras.WaitHelpers;
 
 namespace Kahoot_Bot
 {
-    public struct Bot // single player bot
-    {
-        public int answersCorrect;
-        public int answersWrong;
-        public string name;
-        public bool joinSuccessful;
-        public int score;
-
-        public Bot(string name, int score, bool joinSuccessful)
-        {
-            this.name = name; 
-            this.score = score; 
-            this.joinSuccessful = joinSuccessful;
-            answersCorrect = 0;
-            answersWrong = 0;
-        }
-    }
-
     public class Host
     {
         public string ?lobbyID;
@@ -75,8 +57,7 @@ namespace Kahoot_Bot
             const string GAME_URL = "https://kahoot.it/";
             string numberedBotName = botName + botNumber; // bot name with individual number
             bool joinSuccessful = false;
-            int defaultScore = 0;
-            var bot = new Bot(numberedBotName, defaultScore, joinSuccessful);
+            var bot = new Bot(numberedBotName);
 
             if (driver is null)
             {
@@ -95,7 +76,6 @@ namespace Kahoot_Bot
                 int workaroundDelay = 500; // 500 milliseconds
                 if (delay == true)
                 {
-                    driver.Navigate().Refresh();
                     Thread.Sleep(workaroundDelay);
                 }
                 // while this workaround does prevent most bots from being blocked
@@ -119,7 +99,7 @@ namespace Kahoot_Bot
                 Console.WriteLine("Program dun goofed");
             }
 
-            bots.Add(bot); // add bot to universial list of bots
+            Bots.Add(bot); // add bot to universial list of bots
             return joinSuccessful;
         }
 
@@ -204,6 +184,59 @@ namespace Kahoot_Bot
                 throw new NullReferenceException();
             }
             driver.Quit();
+        }
+    }
+
+    public struct Bot // single player bot
+    {
+        public int answersCorrect;
+        public int answersWrong;
+        private string name;
+        public bool joinSuccessful;
+        public int score;
+        private string status;
+
+        public Bot(string name)
+        {
+            this.name = name;
+            score = 0;
+            answersCorrect = 0;
+            answersWrong = 0;
+            joinSuccessful = false;
+            status = "Joining";
+        }
+
+        public string Status
+        {
+            get { return status; }
+            set
+            {
+                string[] acceptable = { "Success", "Failed", "Kicked", "Deactivated", "Disabled", "Joining", "Timeout" };
+                if (Array.IndexOf(acceptable, value) != -1)
+                {
+                    status = value;
+                }
+                else
+                {
+                    status = "Invalid";
+                }
+            }
+        }
+
+        public string Name
+        {
+            get { return name; }
+            set
+            {
+                if (value.Length <= 15)
+                {
+                    name = value;
+                }
+                else
+                {
+                    name = "Default_Name";
+                }
+            }
         }
     }
 }

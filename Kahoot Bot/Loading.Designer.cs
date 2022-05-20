@@ -44,7 +44,7 @@
             // 
             this.loadingBar.Location = new System.Drawing.Point(5, 371);
             this.loadingBar.Name = "loadingBar";
-            this.loadingBar.Size = new System.Drawing.Size(523, 22);
+            this.loadingBar.Size = new System.Drawing.Size(691, 22);
             this.loadingBar.TabIndex = 0;
             // 
             // indicatorLbl
@@ -75,7 +75,7 @@
             this.botsJoinedList.HideSelection = false;
             this.botsJoinedList.Location = new System.Drawing.Point(534, 32);
             this.botsJoinedList.Name = "botsJoinedList";
-            this.botsJoinedList.Size = new System.Drawing.Size(162, 361);
+            this.botsJoinedList.Size = new System.Drawing.Size(162, 334);
             this.botsJoinedList.TabIndex = 4;
             this.botsJoinedList.UseCompatibleStateImageBehavior = false;
             this.botsJoinedList.View = System.Windows.Forms.View.Details;
@@ -127,7 +127,7 @@
             this.Name = "Loading";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Loading...";
-            this.Shown += new System.EventHandler(this.Shown_Event);
+            this.Shown += new System.EventHandler(this.Loading_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.logoFull)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

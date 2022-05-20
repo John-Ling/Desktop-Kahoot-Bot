@@ -40,7 +40,7 @@
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.label11 = new System.Windows.Forms.Label();
             this.forceNone = new System.Windows.Forms.RadioButton();
-            this.listView2 = new System.Windows.Forms.ListView();
+            this.statusListView = new System.Windows.Forms.ListView();
             this.kickName = new System.Windows.Forms.ColumnHeader();
             this.kickStatus = new System.Windows.Forms.ColumnHeader();
             this.label3 = new System.Windows.Forms.Label();
@@ -51,7 +51,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.listView1 = new System.Windows.Forms.ListView();
+            this.leaderboard = new System.Windows.Forms.ListView();
             this.botPlacement = new System.Windows.Forms.ColumnHeader();
             this.botName = new System.Windows.Forms.ColumnHeader();
             this.botScore = new System.Windows.Forms.ColumnHeader();
@@ -83,7 +83,7 @@
             this.tabPage1.Controls.Add(this.progressBar);
             this.tabPage1.Controls.Add(this.label11);
             this.tabPage1.Controls.Add(this.forceNone);
-            this.tabPage1.Controls.Add(this.listView2);
+            this.tabPage1.Controls.Add(this.statusListView);
             this.tabPage1.Controls.Add(this.label3);
             this.tabPage1.Controls.Add(this.forceSquare);
             this.tabPage1.Controls.Add(this.forceCircle);
@@ -92,7 +92,7 @@
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Controls.Add(this.button1);
             this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Controls.Add(this.listView1);
+            this.tabPage1.Controls.Add(this.leaderboard);
             this.tabPage1.Location = new System.Drawing.Point(4, 24);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -115,13 +115,13 @@
             this.questionLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.questionLabel.Location = new System.Drawing.Point(628, 404);
             this.questionLabel.Name = "questionLabel";
-            this.questionLabel.Size = new System.Drawing.Size(55, 17);
+            this.questionLabel.Size = new System.Drawing.Size(64, 17);
             this.questionLabel.TabIndex = 43;
-            this.questionLabel.Text = "Loading";
+            this.questionLabel.Text = "Loading...";
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(21, 267);
+            this.button2.Location = new System.Drawing.Point(21, 262);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(103, 26);
             this.button2.TabIndex = 42;
@@ -132,7 +132,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label7.Location = new System.Drawing.Point(20, 244);
+            this.label7.Location = new System.Drawing.Point(20, 239);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(106, 20);
             this.label7.TabIndex = 41;
@@ -166,7 +166,7 @@
             // forceNone
             // 
             this.forceNone.AutoSize = true;
-            this.forceNone.Location = new System.Drawing.Point(187, 366);
+            this.forceNone.Location = new System.Drawing.Point(197, 361);
             this.forceNone.Name = "forceNone";
             this.forceNone.Size = new System.Drawing.Size(103, 19);
             this.forceNone.TabIndex = 35;
@@ -174,18 +174,18 @@
             this.forceNone.Text = "None (Default)";
             this.forceNone.UseVisualStyleBackColor = true;
             // 
-            // listView2
+            // statusListView
             // 
-            this.listView2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.statusListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.kickName,
             this.kickStatus});
-            this.listView2.HideSelection = false;
-            this.listView2.Location = new System.Drawing.Point(363, 27);
-            this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(119, 368);
-            this.listView2.TabIndex = 27;
-            this.listView2.UseCompatibleStateImageBehavior = false;
-            this.listView2.View = System.Windows.Forms.View.Details;
+            this.statusListView.HideSelection = false;
+            this.statusListView.Location = new System.Drawing.Point(366, 27);
+            this.statusListView.Name = "statusListView";
+            this.statusListView.Size = new System.Drawing.Size(125, 368);
+            this.statusListView.TabIndex = 27;
+            this.statusListView.UseCompatibleStateImageBehavior = false;
+            this.statusListView.View = System.Windows.Forms.View.Details;
             // 
             // kickName
             // 
@@ -201,7 +201,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(404, 5);
+            this.label3.Location = new System.Drawing.Point(406, 5);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(38, 20);
             this.label3.TabIndex = 26;
@@ -210,7 +210,7 @@
             // forceSquare
             // 
             this.forceSquare.AutoSize = true;
-            this.forceSquare.Location = new System.Drawing.Point(187, 341);
+            this.forceSquare.Location = new System.Drawing.Point(197, 336);
             this.forceSquare.Name = "forceSquare";
             this.forceSquare.Size = new System.Drawing.Size(61, 19);
             this.forceSquare.TabIndex = 25;
@@ -221,7 +221,7 @@
             // forceCircle
             // 
             this.forceCircle.AutoSize = true;
-            this.forceCircle.Location = new System.Drawing.Point(187, 316);
+            this.forceCircle.Location = new System.Drawing.Point(197, 311);
             this.forceCircle.Name = "forceCircle";
             this.forceCircle.Size = new System.Drawing.Size(55, 19);
             this.forceCircle.TabIndex = 24;
@@ -232,7 +232,7 @@
             // forceDiamond
             // 
             this.forceDiamond.AutoSize = true;
-            this.forceDiamond.Location = new System.Drawing.Point(187, 292);
+            this.forceDiamond.Location = new System.Drawing.Point(197, 287);
             this.forceDiamond.Name = "forceDiamond";
             this.forceDiamond.Size = new System.Drawing.Size(74, 19);
             this.forceDiamond.TabIndex = 23;
@@ -243,7 +243,7 @@
             // forceTriangle
             // 
             this.forceTriangle.AutoSize = true;
-            this.forceTriangle.Location = new System.Drawing.Point(187, 267);
+            this.forceTriangle.Location = new System.Drawing.Point(197, 262);
             this.forceTriangle.Name = "forceTriangle";
             this.forceTriangle.Size = new System.Drawing.Size(66, 19);
             this.forceTriangle.TabIndex = 22;
@@ -255,7 +255,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(170, 244);
+            this.label2.Location = new System.Drawing.Point(180, 239);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(156, 20);
             this.label2.TabIndex = 21;
@@ -264,7 +264,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button1.Location = new System.Drawing.Point(21, 298);
+            this.button1.Location = new System.Drawing.Point(21, 293);
             this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(104, 26);
@@ -282,22 +282,22 @@
             this.label1.TabIndex = 19;
             this.label1.Text = "Leaderboard";
             // 
-            // listView1
+            // leaderboard
             // 
-            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.leaderboard.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.leaderboard.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.botPlacement,
             this.botName,
             this.botScore});
-            this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(498, 27);
-            this.listView1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(194, 368);
-            this.listView1.TabIndex = 18;
-            this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.View = System.Windows.Forms.View.Details;
+            this.leaderboard.HideSelection = false;
+            this.leaderboard.Location = new System.Drawing.Point(498, 27);
+            this.leaderboard.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.leaderboard.Name = "leaderboard";
+            this.leaderboard.Size = new System.Drawing.Size(194, 368);
+            this.leaderboard.TabIndex = 18;
+            this.leaderboard.UseCompatibleStateImageBehavior = false;
+            this.leaderboard.View = System.Windows.Forms.View.Details;
             // 
             // botPlacement
             // 
@@ -344,7 +344,7 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.RadioButton forceNone;
-        private System.Windows.Forms.ListView listView2;
+        private System.Windows.Forms.ListView statusListView;
         private System.Windows.Forms.ColumnHeader kickName;
         private System.Windows.Forms.ColumnHeader kickStatus;
         private System.Windows.Forms.Label label3;
@@ -355,7 +355,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ListView leaderboard;
         private System.Windows.Forms.ColumnHeader botPlacement;
         private System.Windows.Forms.ColumnHeader botName;
         private System.Windows.Forms.ColumnHeader botScore;

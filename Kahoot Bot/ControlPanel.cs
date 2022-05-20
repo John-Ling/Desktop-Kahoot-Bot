@@ -10,7 +10,6 @@ using System.Windows.Forms;
 using System.Diagnostics;
 
 // TODO actually implement functinality
-// Add getters and setters across entire program for private variables
 // Things to implement 
 // - Manual override (make all bots pick a specific option)
 // - Remove individual bots
@@ -34,10 +33,11 @@ namespace Kahoot_Bot
         private Bitmap fullLogo;
         private Host host;
 
-        public ControlPanel(Host host)
+        public ControlPanel(Host host, ListView listView)
         {
             InitializeComponent();
             this.host = host;
+
             if (fullLogo is not null)
             {
                 fullLogo.Dispose();
@@ -50,6 +50,8 @@ namespace Kahoot_Bot
             progressBar.Minimum = 0;
             progressBar.Maximum = questions * 10;
             progressBar.Step = 1;
+
+            Initialise_Status_List_View(listView);
         }
 
         private void ControlPanel_Shown(object sender, EventArgs e)
@@ -62,13 +64,27 @@ namespace Kahoot_Bot
             await Play_Game(host);
         }
 
-        private void Initialise_List_Views()
+        private void Initialise_Status_List_View(ListView listView)
         {
-            throw new NotImplementedException();
+            // update status list view with contents of list view from loading screen
+            int playerCount = listView.Items.Count;
+
+            // populate list view
+            for (int i = 0; i < playerCount; i++)
+            {
+                string name = listView.Items[i].Text;
+                var item = new ListViewItem(name);
+                string status = listView.Items[i].SubItems[1].Text;
+                item.SubItems.Add(status);
+
+                statusListView.Items.Add(item);
+            }
         }
         
         private async Task Play_Game(Host host)
         {
+            // all bots randomly select an answer to a kahoot question
+            // this process continues until the game ends
             await Task.Run(async () =>
             {
                 const string ENDING_URL = "https://kahoot.it/ranking";

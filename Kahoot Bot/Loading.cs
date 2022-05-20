@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 /// <summary>
 /// </summary>
@@ -44,17 +45,17 @@ namespace Kahoot_Bot
             indicatorLbl.Text = "";
         }
 
-        private void Shown_Event(object sender, EventArgs e)
+        private void Loading_Shown(object sender, EventArgs e)
         {
             // start separate task to join host into game
-            var joinGameTask = Shown_Event_Async(sender, e);
+            var joinGameTask = Loading_Shown_Async(sender, e);
         }
 
-        private async Task Shown_Event_Async(object sender, EventArgs e)
+        private async Task Loading_Shown_Async(object sender, EventArgs e)
         {
             // wait until the game begins
             await Join_Game(host, botCount);
-            var controlPanel = new ControlPanel(host);
+            var controlPanel = new ControlPanel(host, botsJoinedList);
             Hide();
             controlPanel.Show();
         }
@@ -81,6 +82,7 @@ namespace Kahoot_Bot
                 }
 
                 Update_Label("Loading...");
+                Debug.WriteLine("Loading...");
                 for (int i = 0; i < botCount; i++)
                 {
                     statusString = "Success";
@@ -90,15 +92,18 @@ namespace Kahoot_Bot
                     }
                     if (i != 0)
                     {
+                        Debug.WriteLine("Opening new tab");
                         ((IJavaScriptExecutor)Host.driver).ExecuteScript("window.open();"); // execute javascript command to open new tab
                         Host.driver.SwitchTo().Window(Host.driver.WindowHandles[i]);
                     }
+                    Debug.WriteLine("Joining game");
                     if (i < 6)
                     {
                         joinSuccessful = host.Join_Game(botNumber: i, delay: false);
                     }
                     else
                     {
+                        Debug.WriteLine("Applying delay");
                         joinSuccessful = host.Join_Game(botNumber: i, delay: true);
                     }
 
@@ -107,14 +112,15 @@ namespace Kahoot_Bot
                         statusString = "Failed";
                         botCount--;
                     }
+                    Debug.WriteLine(statusString);
                     numberedBotName = host.botName + i;
-                    Invoke(new Action(() =>
+                    Invoke(new Action(() => // update list view with bot name and status
                     {
                         var item = new ListViewItem(numberedBotName);
                         item.SubItems.Add(statusString);
                         botsJoinedList.Items.Add(item);
                     }));
-                    Invoke(new Action(() =>
+                    Invoke(new Action(() => // move progress bar
                     {
                         for (int i = 0; i < 10; i++)
                         {
@@ -133,9 +139,10 @@ namespace Kahoot_Bot
                     await Task.Delay(1000);
                     finalBotCount = botCount;
                     Update_Label("Waiting for game to start...");
+                    Debug.WriteLine("Waiting for game to begin");
                     // wait for game to begin
                     host.Wait_For_URL_Change();
-                    //Invoke(new Update_Indicator_Label_Delegate(Update_Indicator_Label), "Game has Started");
+                    Debug.WriteLine("Game has started");
                 }
             });
         }
