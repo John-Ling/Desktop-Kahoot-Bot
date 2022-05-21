@@ -8,8 +8,6 @@ using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 //
 // Backend for kahoot bot
-// TODO Fix bug where all buttons are deleted even when they are all present 
-// Potential fixes: Search for buttons via Xpath
 //
 
 namespace Kahoot_Bot

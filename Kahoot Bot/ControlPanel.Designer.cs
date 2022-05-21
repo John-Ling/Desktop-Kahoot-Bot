@@ -113,7 +113,7 @@
             // 
             this.questionLabel.AutoSize = true;
             this.questionLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.questionLabel.Location = new System.Drawing.Point(628, 404);
+            this.questionLabel.Location = new System.Drawing.Point(628, 405);
             this.questionLabel.Name = "questionLabel";
             this.questionLabel.Size = new System.Drawing.Size(64, 17);
             this.questionLabel.TabIndex = 43;
@@ -182,7 +182,7 @@
             this.statusListView.HideSelection = false;
             this.statusListView.Location = new System.Drawing.Point(366, 27);
             this.statusListView.Name = "statusListView";
-            this.statusListView.Size = new System.Drawing.Size(125, 368);
+            this.statusListView.Size = new System.Drawing.Size(125, 374);
             this.statusListView.TabIndex = 27;
             this.statusListView.UseCompatibleStateImageBehavior = false;
             this.statusListView.View = System.Windows.Forms.View.Details;
@@ -294,7 +294,7 @@
             this.leaderboard.Location = new System.Drawing.Point(498, 27);
             this.leaderboard.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.leaderboard.Name = "leaderboard";
-            this.leaderboard.Size = new System.Drawing.Size(194, 368);
+            this.leaderboard.Size = new System.Drawing.Size(194, 374);
             this.leaderboard.TabIndex = 18;
             this.leaderboard.UseCompatibleStateImageBehavior = false;
             this.leaderboard.View = System.Windows.Forms.View.Details;
@@ -329,6 +329,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "ControlPanel";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Control Panel";
             this.Shown += new System.EventHandler(this.ControlPanel_Shown);
             this.tabControl1.ResumeLayout(false);

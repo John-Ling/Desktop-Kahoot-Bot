@@ -8,6 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 
 // TODO actually implement functinality
 // Things to implement 
@@ -46,9 +49,7 @@ namespace Kahoot_Bot
             fullLogo = new Bitmap(@"C:\Users\John\Source\Repos\Kahoot-Bot\Kahoot Bot\logo_full.png");
             logoFull.Image = fullLogo;
 
-            int questions = 10; // temporary value real value will be found via webscraping.
             progressBar.Minimum = 0;
-            progressBar.Maximum = questions * 10;
             progressBar.Step = 1;
 
             Initialise_Status_List_View(listView);
@@ -63,23 +64,6 @@ namespace Kahoot_Bot
         {
             await Play_Game(host);
         }
-
-        private void Initialise_Status_List_View(ListView listView)
-        {
-            // update status list view with contents of list view from loading screen
-            int playerCount = listView.Items.Count;
-
-            // populate list view
-            for (int i = 0; i < playerCount; i++)
-            {
-                string name = listView.Items[i].Text;
-                var item = new ListViewItem(name);
-                string status = listView.Items[i].SubItems[1].Text;
-                item.SubItems.Add(status);
-
-                statusListView.Items.Add(item);
-            }
-        }
         
         private async Task Play_Game(Host host)
         {
@@ -88,6 +72,8 @@ namespace Kahoot_Bot
             await Task.Run(async () =>
             {
                 const string ENDING_URL = "https://kahoot.it/ranking";
+                var wait = new WebDriverWait(Host.driver, new TimeSpan(0, 0, 3));
+                int question = 0;
                 if (Host.driver is null)
                 {
                     throw new NullReferenceException("Driver is null");
@@ -99,7 +85,33 @@ namespace Kahoot_Bot
                 // repeat until game has ended
                 while (Host.driver.Url != ENDING_URL)
                 {
-                    Debug.WriteLine($"Waiting for url change current url {Host.driver.Url}");
+                    question++;
+                    if (question == 1)
+                    {
+                        try
+                        {
+                            // scrape number of questions in game and adjust progress bar
+                            Debug.WriteLine("Scraping questions");
+                            //var e = Host.driver.FindElement(By.XPath("/html/body/div/div[1]/div/div/main/div[1]/div/div[1]"));
+                            const string QUESTION_XPATH = "//*[@id='root']/div[1]/div/div/main/div[3]/div/div[1]";
+                            var e = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(QUESTION_XPATH)));
+                            //int questionCount = Int32.Parse(e.Text);
+                            //progressBar.Maximum = questionCount * 10;
+                            //Debug.WriteLine(questionCount);
+                            Debug.WriteLine(e.Text);
+                        }
+                        catch (WebDriverTimeoutException)
+                        {
+                            //progressBar.Enabled = false;
+                            questionLabel.Text = "Failed";
+                        }
+                    }
+
+                    for (int j = 0; j < 10; j++) // update progress bar
+                    {
+                        progressBar.PerformStep();
+                    }
+
                     host.Wait_For_URL_Change();
                     Debug.WriteLine(Host.driver.Url);
                     await Task.Delay(1000);
@@ -129,6 +141,29 @@ namespace Kahoot_Bot
                 Host.driver.Quit();
                 GC.Collect();
             });
+        }
+
+        private void Initialise_Status_List_View(ListView listView)
+        {
+            // update status list view with contents of list view from loading screen
+            int playerCount = listView.Items.Count;
+
+            // populate list view
+            for (int i = 0; i < playerCount; i++)
+            {
+                string name = listView.Items[i].Text;
+                var item = new ListViewItem(name);
+                string status = listView.Items[i].SubItems[1].Text;
+                item.SubItems.Add(status);
+
+                statusListView.Items.Add(item);
+            }
+        }
+
+        private void Initialise_Leaderboard()
+        {
+            // references data from status list view to ignore bots that have been kicked
+            throw new NotImplementedException();
         }
     }
 }

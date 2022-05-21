@@ -55,8 +55,8 @@ namespace Kahoot_Bot
         {
             // wait until the game begins
             await Join_Game(host, botCount);
-            var controlPanel = new ControlPanel(host, botsJoinedList);
             Hide();
+            var controlPanel = new ControlPanel(host, botsJoinedList);
             controlPanel.Show();
         }
 
@@ -142,7 +142,7 @@ namespace Kahoot_Bot
                     Debug.WriteLine("Waiting for game to begin");
                     // wait for game to begin
                     host.Wait_For_URL_Change();
-                    Debug.WriteLine("Game has started");
+                    Update_Label("Loading control panel...");
                 }
             });
         }
