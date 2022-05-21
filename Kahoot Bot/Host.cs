@@ -129,12 +129,10 @@ namespace Kahoot_Bot
                 try
                 {
                     driver.FindElement(By.XPath(xpath));
-                    Debug.WriteLine("Success");
                 }
                 catch (NoSuchElementException)
                 {
                     tmp.Remove(xpath);
-                    Debug.WriteLine("Removing option");
                 }
             }
 

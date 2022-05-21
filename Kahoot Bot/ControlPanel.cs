@@ -49,7 +49,7 @@ namespace Kahoot_Bot
             fullLogo = new Bitmap(@"C:\Users\John\Source\Repos\Kahoot-Bot\Kahoot Bot\logo_full.png");
             logoFull.Image = fullLogo;
 
-            progressBar.Minimum = 0;
+            progressBar.Minimum = 0; // maximum will be set up later in Play_Game()
             progressBar.Step = 1;
 
             Initialise_Status_List_View(listView);
@@ -73,7 +73,6 @@ namespace Kahoot_Bot
             {
                 const string ENDING_URL = "https://kahoot.it/ranking";
                 var wait = new WebDriverWait(Host.driver, new TimeSpan(0, 0, 3));
-                int question = 0;
                 if (Host.driver is null)
                 {
                     throw new NullReferenceException("Driver is null");
@@ -83,6 +82,9 @@ namespace Kahoot_Bot
                 host.Wait_For_URL_Change();
 
                 // repeat until game has ended
+                int question = 0;
+                int questionCount = 0;
+                bool scrapeSuccessful = true;
                 while (Host.driver.Url != ENDING_URL)
                 {
                     question++;
@@ -94,29 +96,40 @@ namespace Kahoot_Bot
                             Debug.WriteLine("Scraping questions");
                             //var e = Host.driver.FindElement(By.XPath("/html/body/div/div[1]/div/div/main/div[1]/div/div[1]"));
                             const string QUESTION_XPATH = "//*[@id='root']/div[1]/div/div/main/div[3]/div/div[1]";
-                            var e = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(QUESTION_XPATH)));
-                            //int questionCount = Int32.Parse(e.Text);
-                            //progressBar.Maximum = questionCount * 10;
-                            //Debug.WriteLine(questionCount);
-                            Debug.WriteLine(e.Text);
+                            var questionElement = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(QUESTION_XPATH)));
+
+                            // process string to get maximum number of questions
+                            string tmp = questionElement.Text.Substring(5);
+                            questionCount = int.Parse(tmp);
+                            Invoke(new Action(() => progressBar.Maximum = questionCount * 10));
                         }
                         catch (WebDriverTimeoutException)
                         {
-                            //progressBar.Enabled = false;
-                            questionLabel.Text = "Failed";
+                            scrapeSuccessful = false;
+                            Invoke(new Action(() => progressBar.Maximum = 0)); 
                         }
                     }
-
-                    for (int j = 0; j < 10; j++) // update progress bar
+                    string currentQuestion = "Failed";
+                    if (scrapeSuccessful)
                     {
-                        progressBar.PerformStep();
+                        currentQuestion = question.ToString() + " of " + questionCount.ToString();
                     }
+                    
+                    Invoke(new Action(() => questionLabel.Text = currentQuestion));
+
+                    Invoke(new Action(() =>
+                    {
+                       for (int i = 0; i < 10; i++)
+                       {
+                           progressBar.PerformStep();
+                       }
+                   }));
 
                     host.Wait_For_URL_Change();
                     Debug.WriteLine(Host.driver.Url);
                     await Task.Delay(1000);
                     Debug.WriteLine($"Removing unavailable buttons");
-                    List<string> availableButtons = new List<string>(host.Remove_Options());
+                    var availableButtons = new List<string>(host.Remove_Options());
 
                     int i = 0;
                     Debug.WriteLine("Answering question");
