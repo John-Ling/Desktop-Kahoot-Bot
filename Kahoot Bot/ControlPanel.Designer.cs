@@ -56,9 +56,11 @@
             this.botName = new System.Windows.Forms.ColumnHeader();
             this.botScore = new System.Windows.Forms.ColumnHeader();
             this.botEditMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.panel1 = new System.Windows.Forms.Panel();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.logoFull)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -75,22 +77,14 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.panel1);
             this.tabPage1.Controls.Add(this.logoFull);
             this.tabPage1.Controls.Add(this.questionLabel);
-            this.tabPage1.Controls.Add(this.button2);
-            this.tabPage1.Controls.Add(this.label7);
             this.tabPage1.Controls.Add(this.indicatorLabel);
             this.tabPage1.Controls.Add(this.progressBar);
             this.tabPage1.Controls.Add(this.label11);
-            this.tabPage1.Controls.Add(this.forceNone);
             this.tabPage1.Controls.Add(this.statusListView);
             this.tabPage1.Controls.Add(this.label3);
-            this.tabPage1.Controls.Add(this.forceSquare);
-            this.tabPage1.Controls.Add(this.forceCircle);
-            this.tabPage1.Controls.Add(this.forceDiamond);
-            this.tabPage1.Controls.Add(this.forceTriangle);
-            this.tabPage1.Controls.Add(this.label2);
-            this.tabPage1.Controls.Add(this.button1);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.leaderboard);
             this.tabPage1.Location = new System.Drawing.Point(4, 24);
@@ -113,7 +107,7 @@
             // 
             this.questionLabel.AutoSize = true;
             this.questionLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.questionLabel.Location = new System.Drawing.Point(628, 405);
+            this.questionLabel.Location = new System.Drawing.Point(624, 405);
             this.questionLabel.Name = "questionLabel";
             this.questionLabel.Size = new System.Drawing.Size(64, 17);
             this.questionLabel.TabIndex = 43;
@@ -121,7 +115,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(21, 262);
+            this.button2.Location = new System.Drawing.Point(25, 30);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(103, 26);
             this.button2.TabIndex = 42;
@@ -132,7 +126,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label7.Location = new System.Drawing.Point(20, 239);
+            this.label7.Location = new System.Drawing.Point(24, 7);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(106, 20);
             this.label7.TabIndex = 41;
@@ -166,7 +160,7 @@
             // forceNone
             // 
             this.forceNone.AutoSize = true;
-            this.forceNone.Location = new System.Drawing.Point(197, 361);
+            this.forceNone.Location = new System.Drawing.Point(201, 129);
             this.forceNone.Name = "forceNone";
             this.forceNone.Size = new System.Drawing.Size(103, 19);
             this.forceNone.TabIndex = 35;
@@ -210,7 +204,7 @@
             // forceSquare
             // 
             this.forceSquare.AutoSize = true;
-            this.forceSquare.Location = new System.Drawing.Point(197, 336);
+            this.forceSquare.Location = new System.Drawing.Point(201, 104);
             this.forceSquare.Name = "forceSquare";
             this.forceSquare.Size = new System.Drawing.Size(61, 19);
             this.forceSquare.TabIndex = 25;
@@ -221,7 +215,7 @@
             // forceCircle
             // 
             this.forceCircle.AutoSize = true;
-            this.forceCircle.Location = new System.Drawing.Point(197, 311);
+            this.forceCircle.Location = new System.Drawing.Point(201, 79);
             this.forceCircle.Name = "forceCircle";
             this.forceCircle.Size = new System.Drawing.Size(55, 19);
             this.forceCircle.TabIndex = 24;
@@ -232,7 +226,7 @@
             // forceDiamond
             // 
             this.forceDiamond.AutoSize = true;
-            this.forceDiamond.Location = new System.Drawing.Point(197, 287);
+            this.forceDiamond.Location = new System.Drawing.Point(201, 55);
             this.forceDiamond.Name = "forceDiamond";
             this.forceDiamond.Size = new System.Drawing.Size(74, 19);
             this.forceDiamond.TabIndex = 23;
@@ -243,7 +237,7 @@
             // forceTriangle
             // 
             this.forceTriangle.AutoSize = true;
-            this.forceTriangle.Location = new System.Drawing.Point(197, 262);
+            this.forceTriangle.Location = new System.Drawing.Point(201, 30);
             this.forceTriangle.Name = "forceTriangle";
             this.forceTriangle.Size = new System.Drawing.Size(66, 19);
             this.forceTriangle.TabIndex = 22;
@@ -255,7 +249,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(180, 239);
+            this.label2.Location = new System.Drawing.Point(184, 7);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(156, 20);
             this.label2.TabIndex = 21;
@@ -264,7 +258,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button1.Location = new System.Drawing.Point(21, 293);
+            this.button1.Location = new System.Drawing.Point(25, 61);
             this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(104, 26);
@@ -319,6 +313,22 @@
             this.botEditMenu.Name = "botEditMenu";
             this.botEditMenu.Size = new System.Drawing.Size(61, 4);
             // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.label7);
+            this.panel1.Controls.Add(this.button1);
+            this.panel1.Controls.Add(this.label2);
+            this.panel1.Controls.Add(this.button2);
+            this.panel1.Controls.Add(this.forceTriangle);
+            this.panel1.Controls.Add(this.forceDiamond);
+            this.panel1.Controls.Add(this.forceCircle);
+            this.panel1.Controls.Add(this.forceSquare);
+            this.panel1.Controls.Add(this.forceNone);
+            this.panel1.Location = new System.Drawing.Point(6, 226);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(354, 156);
+            this.panel1.TabIndex = 45;
+            // 
             // ControlPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -336,6 +346,8 @@
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.logoFull)).EndInit();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -368,5 +380,6 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label questionLabel;
         private System.Windows.Forms.PictureBox logoFull;
+        private System.Windows.Forms.Panel panel1;
     }
 }

@@ -19,7 +19,6 @@ using SeleniumExtras.WaitHelpers;
 // - End all bots
 // - Internal Bot scoreboard
 // - Show bot placements
-// - Show progress of game using webscraping to get the number of kahoot questions
 // - Log top 5 bots and bottom 5 in points and accuracy
 // - Add manual editing of each bot via context menu (context menu will open a tab)
 // Manual Bot Editing:
@@ -28,6 +27,7 @@ using SeleniumExtras.WaitHelpers;
 //  - Kick (permanent)
 //  - See points and accuracy
 //  - Set manual override
+// Fix error System.Reflection.TargetParameterCountException in Update_Leaderboard()
 
 namespace Kahoot_Bot
 {
@@ -36,7 +36,7 @@ namespace Kahoot_Bot
         private Bitmap fullLogo;
         private Host host;
 
-        public ControlPanel(Host host, ListView listView)
+        public ControlPanel(Host host)
         {
             InitializeComponent();
             this.host = host;
@@ -52,7 +52,8 @@ namespace Kahoot_Bot
             progressBar.Minimum = 0; // maximum will be set up later in Play_Game()
             progressBar.Step = 1;
 
-            Initialise_Status_List_View(listView);
+            Update_Status_ListView();
+            Update_Leaderboard();
         }
 
         private void ControlPanel_Shown(object sender, EventArgs e)
@@ -90,24 +91,7 @@ namespace Kahoot_Bot
                     question++;
                     if (question == 1)
                     {
-                        try
-                        {
-                            // scrape number of questions in game and adjust progress bar
-                            Debug.WriteLine("Scraping questions");
-                            //var e = Host.driver.FindElement(By.XPath("/html/body/div/div[1]/div/div/main/div[1]/div/div[1]"));
-                            const string QUESTION_XPATH = "//*[@id='root']/div[1]/div/div/main/div[3]/div/div[1]";
-                            var questionElement = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(QUESTION_XPATH)));
-
-                            // process string to get maximum number of questions
-                            string tmp = questionElement.Text.Substring(5);
-                            questionCount = int.Parse(tmp);
-                            Invoke(new Action(() => progressBar.Maximum = questionCount * 10));
-                        }
-                        catch (WebDriverTimeoutException)
-                        {
-                            scrapeSuccessful = false;
-                            Invoke(new Action(() => progressBar.Maximum = 0)); 
-                        }
+                        scrapeSuccessful = Scrape_Question_Progress(ref questionCount);
                     }
                     string currentQuestion = "Failed";
                     if (scrapeSuccessful)
@@ -126,8 +110,9 @@ namespace Kahoot_Bot
                    }));
 
                     host.Wait_For_URL_Change();
-                    Debug.WriteLine(Host.driver.Url);
-                    await Task.Delay(1000);
+                    // wait until answer blocks are revealed
+
+                    await Task.Delay(1000); // potentially adjust
                     Debug.WriteLine($"Removing unavailable buttons");
                     var availableButtons = new List<string>(host.Remove_Options());
 
@@ -135,19 +120,42 @@ namespace Kahoot_Bot
                     Debug.WriteLine("Answering question");
                     foreach (var bot in host.Bots)
                     {
+                        Host.driver.SwitchTo().Window(Host.driver.WindowHandles[i]);
                         if (bot.joinSuccessful)
                         {
-                            Host.driver.SwitchTo().Window(Host.driver.WindowHandles[i]);
                             host.Answer_Question(availableButtons);
                         }
                         i++;
                     }
 
-                    // this is not a typo
-                    Debug.WriteLine("Waiting for URL change 1");
-                    host.Wait_For_URL_Change();  // wait until page changes from correct/wrong answer screen
-                    Debug.WriteLine("Waiting for URL change 2");
-                    host.Wait_For_URL_Change(); // wait until page changes from question loading screen
+                    host.Wait_For_URL_Change();
+                    // wait until timer runs out or all players submit an answer
+
+                    for (int j = 0; j < host.Bots.Count; j++)
+                    {
+                        var bot = host.Bots[j];
+                        Host.driver.SwitchTo().Window(Host.driver.WindowHandles[j]);
+                        if (bot.joinSuccessful)
+                        {
+                            // attempt to scrape score for bot
+                            const string SCORE_XPATH = "/html/body/div/div[1]/div/div/div/div[5]/div[2]";
+                            try
+                            {
+                                var scoreElement = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(SCORE_XPATH)));
+                                int score = int.Parse(scoreElement.Text);
+                                bot.score = bot.score + score;
+                            }
+                            catch (WebDriverTimeoutException)
+                            {
+                                Debug.WriteLine("Failed to scrape score");
+                                // do not adjust score for bot
+                            }
+                        }
+                        j++;
+                    }
+                    Update_Leaderboard();
+                    host.Wait_For_URL_Change(); 
+                    // wait until game starts next question
                 }
 
                 await Task.Delay(5000);
@@ -156,27 +164,112 @@ namespace Kahoot_Bot
             });
         }
 
-        private void Initialise_Status_List_View(ListView listView)
+        private bool Scrape_Question_Progress(ref int questionCount)
         {
-            // update status list view with contents of list view from loading screen
-            int playerCount = listView.Items.Count;
-
-            // populate list view
-            for (int i = 0; i < playerCount; i++)
+            var wait = new WebDriverWait(Host.driver, new TimeSpan(0, 0, 3));
+            bool scrapeSuccessful = false;
+            try
             {
-                string name = listView.Items[i].Text;
-                var item = new ListViewItem(name);
-                string status = listView.Items[i].SubItems[1].Text;
-                item.SubItems.Add(status);
+                // scrape number of questions in game and adjust progress bar
+                Debug.WriteLine("Scraping questions");
+                const string QUESTION_XPATH = "//*[@id='root']/div[1]/div/div/main/div[3]/div/div[1]";
+                var questionElement = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(QUESTION_XPATH)));
 
-                statusListView.Items.Add(item);
+                // process string to get maximum number of questions
+                string tmp = questionElement.Text.Substring(5);
+                int maxQuestions = int.Parse(tmp);
+                questionCount = maxQuestions;
+                Invoke(new Action(() => progressBar.Maximum = maxQuestions * 10));
+                scrapeSuccessful = true;
             }
+            catch (WebDriverTimeoutException)
+            {
+                Invoke(new Action(() => progressBar.Maximum = 0));
+                questionCount = 0;
+            }
+
+            return scrapeSuccessful;
         }
 
-        private void Initialise_Leaderboard()
+        private void Update_Status_ListView()
+        {
+            if (statusListView.Items.Count == 0)
+            {
+                // populate list view if not initialised yet
+                foreach (var bot in host.Bots)
+                {
+                    string name = bot.Name;
+                    string status = bot.Status;
+                    var item = new ListViewItem(name);
+                    item.SubItems.Add(status);
+                    statusListView.Items.Add(item);
+                }
+            }
+            else
+            {
+                // update list view
+                for (int i = 0; i < statusListView.Items.Count; i++)
+                {
+                    statusListView.Items[i].SubItems[1].Text = host.Bots[i].Status;
+                }
+            }
+           
+        }
+
+        private void Update_Leaderboard()
         {
             // references data from status list view to ignore bots that have been kicked
-            throw new NotImplementedException();
+            // sort all bots by their score
+            if (leaderboard.Items.Count == 0)
+            {
+                int placement = 0;
+                // initialise leaderboard if empty
+                foreach(var bot in host.Bots)
+                {
+                    placement++;
+                    string name = bot.Name;
+                    int score = bot.score;
+                    var item = new ListViewItem(placement.ToString());
+                    item.SubItems.Add(name);
+                    item.SubItems.Add(score.ToString());
+                    leaderboard.Items.Add(item);
+                }
+            }
+            else
+            {
+                // update leaderboard and sort by score ascending order using bubble sort
+                bool swaps;
+                int upperBound = leaderboard.Items.Count - 1;
+                do
+                {
+                    swaps = false;
+                    for (int i = 0; i < upperBound; i++)
+                    {
+                        Debug.WriteLine("Getting scores");
+                        int score1 = (int)Invoke(new Func<int, int>(i => int.Parse(leaderboard.Items[i].SubItems[2].Text)));
+                        int score2 = (int)Invoke(new Func<int, int>(i => int.Parse(leaderboard.Items[i + 1].SubItems[2].Text)));
+                        if (score1 < score2)
+                        {
+                            // swap
+                            Debug.WriteLine("Swapping");
+                            string tmp1 = leaderboard.Items[i].SubItems[1].Text;
+                            string tmp2 = leaderboard.Items[i].SubItems[2].Text;
+                            Debug.WriteLine("Invoking");
+                            Invoke(new Action<int>(i =>
+                            {
+                                leaderboard.Items[i].SubItems[1].Text = leaderboard.Items[i + 1].SubItems[1].Text;
+                                leaderboard.Items[i].SubItems[2].Text = leaderboard.Items[i + 1].SubItems[2].Text;
+                                leaderboard.Items[i + 1].SubItems[1].Text = tmp1;
+                                leaderboard.Items[i + 1].SubItems[2].Text = tmp2;
+                            }));
+                            swaps = true;
+                        }
+                        Debug.WriteLine("Continuing");
+                    }
+                    Debug.WriteLine("Decrementing");
+                    upperBound--;
+                } while (swaps);
+            }
         }
     }
 }

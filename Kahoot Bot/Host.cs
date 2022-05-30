@@ -56,6 +56,7 @@ namespace Kahoot_Bot
             string numberedBotName = botName + botNumber; // bot name with individual number
             bool joinSuccessful = false;
             var bot = new Bot(numberedBotName);
+            bot.Status = "Failed";
 
             if (driver is null)
             {
@@ -91,10 +92,12 @@ namespace Kahoot_Bot
 
                 joinSuccessful = true;
                 bot.joinSuccessful = true;
+                bot.Status = "Success";
             }
             catch (TimeoutException)
             {
                 Console.WriteLine("Program dun goofed");
+                bot.Status = "Timeout";
             }
 
             Bots.Add(bot); // add bot to universial list of bots

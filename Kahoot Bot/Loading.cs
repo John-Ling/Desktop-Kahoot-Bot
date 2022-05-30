@@ -56,7 +56,7 @@ namespace Kahoot_Bot
             // wait until the game begins
             await Join_Game(host, botCount);
             Hide();
-            var controlPanel = new ControlPanel(host, botsJoinedList);
+            var controlPanel = new ControlPanel(host);
             controlPanel.Show();
         }
 
