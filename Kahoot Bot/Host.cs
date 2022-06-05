@@ -15,23 +15,17 @@ namespace Kahoot_Bot
     public class Host
     {
         public string ?lobbyID;
-        public string ?botName;
+        public string botName;
         public static IWebDriver ?driver; // webdriver for browser control
 
-        private static List<Bot> bots = new List<Bot>(); // List of all kahoot bots shared across all instances of host
+        internal Bot[] bots; // array of all bots in game
         private static ChromeOptions ?options;
         private static ChromeDriverService driverService = ChromeDriverService.CreateDefaultService();
-
-        public List<Bot> Bots
-        {
-            get { return bots; }
-            set { bots = value; }
-        }
-
-        public Host(string ID, string name)
+        public Host(string ID, string name, int botCount)
         {
             lobbyID = ID;
             botName = name;
+            bots = new Bot[botCount];
         }
 
         public void Initialise_Webdriver()
@@ -55,7 +49,7 @@ namespace Kahoot_Bot
             const string GAME_URL = "https://kahoot.it/";
             string numberedBotName = botName + botNumber; // bot name with individual number
             bool joinSuccessful = false;
-            var bot = new Bot(numberedBotName);
+            var bot = new Bot();
             bot.Status = "Failed";
 
             if (driver is null)
@@ -70,9 +64,7 @@ namespace Kahoot_Bot
             {
                 // delay workaround since kahoot blocks bots
                 // the block seems to be timer based
-                // refreshing the page to create a brief pause seems to be the quickest way to bypass this
-                // however this does bring network speeds into consideration
-                int workaroundDelay = 500; // 500 milliseconds
+                int workaroundDelay = 0; // 500 milliseconds
                 if (delay == true)
                 {
                     Thread.Sleep(workaroundDelay);
@@ -93,6 +85,7 @@ namespace Kahoot_Bot
                 joinSuccessful = true;
                 bot.joinSuccessful = true;
                 bot.Status = "Success";
+                bot.Name = numberedBotName;
             }
             catch (TimeoutException)
             {
@@ -100,7 +93,7 @@ namespace Kahoot_Bot
                 bot.Status = "Timeout";
             }
 
-            Bots.Add(bot); // add bot to universial list of bots
+            bots[botNumber] = bot; // add bot to universial list of bots
             return joinSuccessful;
         }
 
@@ -159,8 +152,27 @@ namespace Kahoot_Bot
             }
             catch (TimeoutException)
             {
-                Console.WriteLine("Failed to answer");
+                Debug.WriteLine("Failed to answer");
             }
+        }
+
+        public int Scrape_Score()
+        {
+            // get current score for a single bot
+            var wait = new WebDriverWait(Host.driver, new TimeSpan(0, 0, 3));
+            int score = 0;
+            try
+            {
+                const string SCORE_XPATH = "//*[@id='root']/div[1]/div/div/div/div[5]/div[2]";
+                var scoreElement = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(SCORE_XPATH)));
+                score = int.Parse(scoreElement.Text);
+
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Debug.WriteLine("Failed to scrape score");
+            }
+            return score;
         }
 
         public void Wait_For_URL_Change()
@@ -183,59 +195,6 @@ namespace Kahoot_Bot
                 throw new NullReferenceException();
             }
             driver.Quit();
-        }
-    }
-
-    public struct Bot // single player bot
-    {
-        public int answersCorrect;
-        public int answersWrong;
-        private string name;
-        public bool joinSuccessful;
-        public int score;
-        private string status;
-
-        public Bot(string name)
-        {
-            this.name = name;
-            score = 0;
-            answersCorrect = 0;
-            answersWrong = 0;
-            joinSuccessful = false;
-            status = "Joining";
-        }
-
-        public string Status
-        {
-            get { return status; }
-            set
-            {
-                string[] acceptable = { "Success", "Failed", "Kicked", "Deactivated", "Disabled", "Joining", "Timeout" };
-                if (Array.IndexOf(acceptable, value) != -1)
-                {
-                    status = value;
-                }
-                else
-                {
-                    status = "Invalid";
-                }
-            }
-        }
-
-        public string Name
-        {
-            get { return name; }
-            set
-            {
-                if (value.Length <= 15)
-                {
-                    name = value;
-                }
-                else
-                {
-                    name = "Default_Name";
-                }
-            }
         }
     }
 }

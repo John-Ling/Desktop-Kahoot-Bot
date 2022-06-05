@@ -27,7 +27,7 @@ namespace Kahoot_Bot
         {
             InitializeComponent();
             this.botCount = botCount;
-            host = new Host(lobbyID, botName);
+            host = new Host(lobbyID, botName, botCount);
 
             loadingBar.Visible = true;
             loadingBar.Minimum = 0;
@@ -72,15 +72,17 @@ namespace Kahoot_Bot
             bool joinSuccessful = false;
             string numberedBotName;
             string statusString;
+
             await Task.Run(async () =>
             {
                 host.Initialise_Webdriver();
+                bool completed = false;
 
                 if (Host.driver is null)
                 {
                     throw new NullReferenceException("Driver is null");
                 }
-
+                Debug.WriteLine(Host.driver.Url);
                 Update_Label("Loading...");
                 Debug.WriteLine("Loading...");
                 for (int i = 0; i < botCount; i++)
@@ -110,7 +112,6 @@ namespace Kahoot_Bot
                     if (!joinSuccessful)
                     {
                         statusString = "Failed";
-                        botCount--;
                     }
                     Debug.WriteLine(statusString);
                     numberedBotName = host.botName + i;
@@ -129,6 +130,7 @@ namespace Kahoot_Bot
                     }));
                     botsJoinedSoFar++;
                 }
+                
                 if (kickBot)
                 {
                     host.Shutdown_Host();
@@ -136,13 +138,20 @@ namespace Kahoot_Bot
                 }
                 else
                 {
-                    await Task.Delay(1000);
-                    finalBotCount = botCount;
-                    Update_Label("Waiting for game to start...");
-                    Debug.WriteLine("Waiting for game to begin");
-                    // wait for game to begin
-                    host.Wait_For_URL_Change();
-                    Update_Label("Loading control panel...");
+                    if (Host.driver.Url == "https://kahoot.it/start")
+                    {
+                        // end immediately and load control panel
+                    }
+                    else
+                    {
+                        await Task.Delay(1000);
+                        finalBotCount = botCount;
+                        Update_Label("Waiting for game to start...");
+                        Debug.WriteLine("Waiting for game to begin");
+                        // wait for game to begin
+                        host.Wait_For_URL_Change();
+                        Update_Label("Loading control panel...");
+                    }
                 }
             });
         }

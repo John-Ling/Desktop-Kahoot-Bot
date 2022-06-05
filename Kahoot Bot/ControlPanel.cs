@@ -12,23 +12,6 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 
-// TODO actually implement functinality
-// Things to implement 
-// - Manual override (make all bots pick a specific option)
-// - Remove individual bots
-// - End all bots
-// - Internal Bot scoreboard
-// - Show bot placements
-// - Log top 5 bots and bottom 5 in points and accuracy
-// - Add manual editing of each bot via context menu (context menu will open a tab)
-// Manual Bot Editing:
-//  - See name
-//  - Disable (not answer)
-//  - Kick (permanent)
-//  - See points and accuracy
-//  - Set manual override
-// Fix error System.Reflection.TargetParameterCountException in Update_Leaderboard()
-
 namespace Kahoot_Bot
 {
     public partial class ControlPanel : Form
@@ -52,7 +35,7 @@ namespace Kahoot_Bot
             progressBar.Minimum = 0; // maximum will be set up later in Play_Game()
             progressBar.Step = 1;
 
-            Update_Status_ListView();
+            //Update_Status_ListView();
             Update_Leaderboard();
         }
 
@@ -65,7 +48,7 @@ namespace Kahoot_Bot
         {
             await Play_Game(host);
         }
-        
+
         private async Task Play_Game(Host host)
         {
             // all bots randomly select an answer to a kahoot question
@@ -84,90 +67,96 @@ namespace Kahoot_Bot
 
                 // repeat until game has ended
                 int question = 0;
-                int questionCount = 0;
-                bool scrapeSuccessful = true;
+                int questionCount = Scrape_Question_Count();
+                
                 while (Host.driver.Url != ENDING_URL)
                 {
                     question++;
-                    if (question == 1)
+                    if (questionCount > 0)
                     {
-                        scrapeSuccessful = Scrape_Question_Progress(ref questionCount);
+                        string currentQuestion = question.ToString() + " of " + questionCount.ToString();
+                        Invoke(new Action(() =>
+                        {
+                            progressBar.Maximum = questionCount * 10;
+                            questionLabel.Text = currentQuestion;
+                        }));
                     }
-                    string currentQuestion = "Failed";
-                    if (scrapeSuccessful)
+                    else
                     {
-                        currentQuestion = question.ToString() + " of " + questionCount.ToString();
-                    }
-                    
-                    Invoke(new Action(() => questionLabel.Text = currentQuestion));
+                        Invoke(new Action(() =>
+                        {
+                            progressBar.Maximum = 0;
+                            questionLabel.Text = "Error";
+                        }));
 
-                    Invoke(new Action(() =>
-                    {
-                       for (int i = 0; i < 10; i++)
-                       {
-                           progressBar.PerformStep();
-                       }
-                   }));
+                        Invoke(new Action(() =>
+                        {
+                            for (int i = 0; i < 10; i++)
+                            {
+                                progressBar.PerformStep();
+                            }
+                        }));
+                    }
 
                     host.Wait_For_URL_Change();
                     // wait until answer blocks are revealed
 
-                    await Task.Delay(1000); // potentially adjust
-                    Debug.WriteLine($"Removing unavailable buttons");
                     var availableButtons = new List<string>(host.Remove_Options());
 
-                    int i = 0;
-                    Debug.WriteLine("Answering question");
-                    foreach (var bot in host.Bots)
+                    for (int i = 0; i < host.bots.Length; i++)
                     {
                         Host.driver.SwitchTo().Window(Host.driver.WindowHandles[i]);
-                        if (bot.joinSuccessful)
+                        if (host.bots[i].joinSuccessful)
                         {
                             host.Answer_Question(availableButtons);
                         }
-                        i++;
                     }
 
                     host.Wait_For_URL_Change();
                     // wait until timer runs out or all players submit an answer
-
-                    for (int j = 0; j < host.Bots.Count; j++)
+                    string nameTemplate = host.botName;
+                    for (int i = 0; i < host.bots.Length; i++)
                     {
-                        var bot = host.Bots[j];
-                        Host.driver.SwitchTo().Window(Host.driver.WindowHandles[j]);
-                        if (bot.joinSuccessful)
+                        // update score for each bot
+                        string botName = nameTemplate + i; // form name of current bot
+                        Host.driver.SwitchTo().Window(Host.driver.WindowHandles[i]); // switch tabs
+                        int score = host.Scrape_Score();
+                        Debug.WriteLine($"Setting {botName}'s score to {score}");
+                        int updateIndex = -1; // location of bot within array
+
+                        // find index of bot
+                        for (int j = 0; j < host.bots.Length; j++)
                         {
-                            // attempt to scrape score for bot
-                            const string SCORE_XPATH = "/html/body/div/div[1]/div/div/div/div[5]/div[2]";
-                            try
+                            if (host.bots[j].Name == botName)
                             {
-                                var scoreElement = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(SCORE_XPATH)));
-                                int score = int.Parse(scoreElement.Text);
-                                bot.score = bot.score + score;
-                            }
-                            catch (WebDriverTimeoutException)
-                            {
-                                Debug.WriteLine("Failed to scrape score");
-                                // do not adjust score for bot
+                                Debug.WriteLine($"{botName} is found at {j}");
+                                updateIndex = j;
+                                break;
                             }
                         }
-                        j++;
+
+                        if (updateIndex != -1)
+                        {
+                            host.bots[updateIndex].score = score;
+                        }
+
                     }
                     Update_Leaderboard();
-                    host.Wait_For_URL_Change(); 
+                    host.Wait_For_URL_Change();
                     // wait until game starts next question
                 }
-
-                await Task.Delay(5000);
+                Debug.WriteLine("Game has ended. Thanks for using my software! :)");
+                await Task.Delay(3000);
                 Host.driver.Quit();
                 GC.Collect();
             });
         }
 
-        private bool Scrape_Question_Progress(ref int questionCount)
+        private int Scrape_Question_Count()
         {
+            // scrapes number of questions within kahoot game
             var wait = new WebDriverWait(Host.driver, new TimeSpan(0, 0, 3));
-            bool scrapeSuccessful = false;
+            int count = 0;
             try
             {
                 // scrape number of questions in game and adjust progress bar
@@ -176,44 +165,13 @@ namespace Kahoot_Bot
                 var questionElement = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(QUESTION_XPATH)));
 
                 // process string to get maximum number of questions
-                string tmp = questionElement.Text.Substring(5);
-                int maxQuestions = int.Parse(tmp);
-                questionCount = maxQuestions;
-                Invoke(new Action(() => progressBar.Maximum = maxQuestions * 10));
-                scrapeSuccessful = true;
+                count = int.Parse(questionElement.Text.Substring(5));
             }
             catch (WebDriverTimeoutException)
             {
-                Invoke(new Action(() => progressBar.Maximum = 0));
-                questionCount = 0;
+                count = 0;
             }
-
-            return scrapeSuccessful;
-        }
-
-        private void Update_Status_ListView()
-        {
-            if (statusListView.Items.Count == 0)
-            {
-                // populate list view if not initialised yet
-                foreach (var bot in host.Bots)
-                {
-                    string name = bot.Name;
-                    string status = bot.Status;
-                    var item = new ListViewItem(name);
-                    item.SubItems.Add(status);
-                    statusListView.Items.Add(item);
-                }
-            }
-            else
-            {
-                // update list view
-                for (int i = 0; i < statusListView.Items.Count; i++)
-                {
-                    statusListView.Items[i].SubItems[1].Text = host.Bots[i].Status;
-                }
-            }
-           
+            return count;
         }
 
         private void Update_Leaderboard()
@@ -224,7 +182,7 @@ namespace Kahoot_Bot
             {
                 int placement = 0;
                 // initialise leaderboard if empty
-                foreach(var bot in host.Bots)
+                foreach(var bot in host.bots)
                 {
                     placement++;
                     string name = bot.Name;
@@ -237,38 +195,23 @@ namespace Kahoot_Bot
             }
             else
             {
-                // update leaderboard and sort by score ascending order using bubble sort
-                bool swaps;
-                int upperBound = leaderboard.Items.Count - 1;
-                do
+                // sort in ascending order
+                // minor bug that puts bots that have equal scores in wrong positions
+                // potential solution to check in kahoot which bot is ahead 
+                Array.Sort(host.bots, (x, y) => y.score.CompareTo(x.score));
+                leaderboard.Invoke((MethodInvoker)delegate
                 {
-                    swaps = false;
-                    for (int i = 0; i < upperBound; i++)
+                   for (int i = 0; i < leaderboard.Items.Count; i++)
                     {
-                        Debug.WriteLine("Getting scores");
-                        int score1 = (int)Invoke(new Func<int, int>(i => int.Parse(leaderboard.Items[i].SubItems[2].Text)));
-                        int score2 = (int)Invoke(new Func<int, int>(i => int.Parse(leaderboard.Items[i + 1].SubItems[2].Text)));
-                        if (score1 < score2)
-                        {
-                            // swap
-                            Debug.WriteLine("Swapping");
-                            string tmp1 = leaderboard.Items[i].SubItems[1].Text;
-                            string tmp2 = leaderboard.Items[i].SubItems[2].Text;
-                            Debug.WriteLine("Invoking");
-                            Invoke(new Action<int>(i =>
-                            {
-                                leaderboard.Items[i].SubItems[1].Text = leaderboard.Items[i + 1].SubItems[1].Text;
-                                leaderboard.Items[i].SubItems[2].Text = leaderboard.Items[i + 1].SubItems[2].Text;
-                                leaderboard.Items[i + 1].SubItems[1].Text = tmp1;
-                                leaderboard.Items[i + 1].SubItems[2].Text = tmp2;
-                            }));
-                            swaps = true;
-                        }
-                        Debug.WriteLine("Continuing");
+                        leaderboard.Items[i].SubItems[1].Text = host.bots[i].Name;
+                        leaderboard.Items[i].SubItems[2].Text = host.bots[i].score.ToString();
                     }
-                    Debug.WriteLine("Decrementing");
-                    upperBound--;
-                } while (swaps);
+                });
+                
+            }
+            foreach (var bot in host.bots)
+            {
+                Debug.WriteLine(bot.Name + ": " + bot.score);
             }
         }
     }
