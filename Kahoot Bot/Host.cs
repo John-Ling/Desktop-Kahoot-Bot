@@ -6,6 +6,9 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
+using WebDriverManager;
+using WebDriverManager.DriverConfigs.Impl;
+
 //
 // Backend for kahoot bot
 //
@@ -30,6 +33,7 @@ namespace Kahoot_Bot
 
         public void Initialise_Webdriver()
         {
+            new DriverManager().SetUpDriver(new ChromeConfig());
             options = new ChromeOptions();
             options.AddArgument("headless");
             driverService.HideCommandPromptWindow = true;
@@ -100,19 +104,8 @@ namespace Kahoot_Bot
         public List<string> Remove_Options()
         {
             // remove options that are not present when answering (for example a True/False questions wouldn't have the green or yellow button)
-            var buttonsPresent = new List<string> { // html xpaths for the 4 kahoot buttons
-                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[1]",
-                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[2]",
-                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[3]",
-                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[4]"
-            };
-
-            var tmp = new List<string> {
-                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[1]",
-                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[2]",
-                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[3]",
-                "/html/body/div/div[1]/div/div/main/div[2]/div/div/button[4]"
-            };
+            var buttonClasses = new List<string> { "fFONXg", "hZGSQg", "cckBYR", "epOaBR" }; // html classes of the 4 kahoot buttons
+            var tmp = new List<string> { "fFONXg", "hZGSQg", "cckBYR", "epOaBR" };
 
             if (driver is null)
             {
@@ -120,20 +113,20 @@ namespace Kahoot_Bot
             }
             // you cannot remove items from a array whilst enumerating through it so two arrays are needed
 
-            foreach (var xpath in buttonsPresent)
+            foreach (var className in  buttonClasses)
             {
                 try
                 {
-                    driver.FindElement(By.XPath(xpath));
+                    driver.FindElement(By.ClassName(className));
                 }
                 catch (NoSuchElementException)
                 {
-                    tmp.Remove(xpath);
+                    tmp.Remove(className);
                 }
             }
 
-            buttonsPresent = tmp;
-            return buttonsPresent;
+            buttonClasses = tmp;
+            return buttonClasses;
         }
 
         public void Answer_Question(List<string> availableAnswers)
@@ -147,7 +140,7 @@ namespace Kahoot_Bot
             try
             {
                 // wait until button is available
-                var button = wait.Until(e => e.FindElement(By.XPath(availableAnswers[index])));
+                var button = wait.Until(e => e.FindElement(By.ClassName(availableAnswers[index])));
                 button.Click();
             }
             catch (TimeoutException)
@@ -163,8 +156,8 @@ namespace Kahoot_Bot
             int score = 0;
             try
             {
-                const string SCORE_XPATH = "//*[@id='root']/div[1]/div/div/div/div[5]/div[2]";
-                var scoreElement = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(SCORE_XPATH)));
+                const string SCORE_CLASS = "hycjox";
+                var scoreElement = wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName(SCORE_CLASS)));
                 score = int.Parse(scoreElement.Text);
 
             }

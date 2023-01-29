@@ -68,6 +68,20 @@ namespace Kahoot_Bot
                 // repeat until game has ended
                 int question = 0;
                 int questionCount = Scrape_Question_Count();
+                Invoke(new Action(() =>
+                {
+                    progressBar.Minimum = 0;
+                    if (questionCount <= 0)
+                    {
+                        progressBar.Maximum = 0;
+                        questionLabel.Text = "Error";
+                    }
+                    else
+                    {
+                        progressBar.Maximum = questionCount * 10;
+                    }
+                    progressBar.Step = 1;
+                }));
                 
                 while (Host.driver.Url != ENDING_URL)
                 {
@@ -75,27 +89,17 @@ namespace Kahoot_Bot
                     if (questionCount > 0)
                     {
                         string currentQuestion = question.ToString() + " of " + questionCount.ToString();
-                        Invoke(new Action(() =>
-                        {
-                            progressBar.Maximum = questionCount * 10;
+                        Invoke(new Action(() => {
                             questionLabel.Text = currentQuestion;
-                        }));
+                            for (int i = 0; i < 10; i++) 
+                            {
+                                progressBar.PerformStep(); 
+                            }
+                            }));
                     }
                     else
                     {
-                        Invoke(new Action(() =>
-                        {
-                            progressBar.Maximum = 0;
-                            questionLabel.Text = "Error";
-                        }));
-
-                        Invoke(new Action(() =>
-                        {
-                            for (int i = 0; i < 10; i++)
-                            {
-                                progressBar.PerformStep();
-                            }
-                        }));
+                        Invoke(new Action(() => questionLabel.Text = "Error" ));
                     }
 
                     host.Wait_For_URL_Change();
@@ -161,15 +165,15 @@ namespace Kahoot_Bot
             {
                 // scrape number of questions in game and adjust progress bar
                 Debug.WriteLine("Scraping questions");
-                const string QUESTION_XPATH = "//*[@id='root']/div[1]/div/div/main/div[3]/div/div[1]";
-                var questionElement = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(QUESTION_XPATH)));
+                const string QUESTION_CLASS = "hAQMGb";
+                var questionElement = wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName(QUESTION_CLASS)));
 
                 // process string to get maximum number of questions
                 count = int.Parse(questionElement.Text.Substring(5));
             }
             catch (WebDriverTimeoutException)
             {
-                count = 0;
+                count = -1;
             }
             return count;
         }
